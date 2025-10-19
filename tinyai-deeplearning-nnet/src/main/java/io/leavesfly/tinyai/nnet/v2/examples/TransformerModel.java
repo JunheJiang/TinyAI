@@ -1,17 +1,17 @@
 package io.leavesfly.tinyai.nnet.v2.examples;
 
+import io.leavesfly.tinyai.func.Variable;
+import io.leavesfly.tinyai.ndarr.NdArray;
+import io.leavesfly.tinyai.ndarr.Shape;
 import io.leavesfly.tinyai.nnet.v2.core.Module;
 import io.leavesfly.tinyai.nnet.v2.layer.transformer.MultiHeadAttention;
 import io.leavesfly.tinyai.nnet.v2.layer.transformer.PositionalEncoding;
 import io.leavesfly.tinyai.nnet.v2.layer.transformer.TransformerEncoderLayer;
 import io.leavesfly.tinyai.nnet.v2.layer.transformer.TransformerDecoderLayer;
-import io.leavesfly.tinyai.nnet.autodiff.Variable;
-import io.leavesfly.tinyai.nnet.core.NdArray;
-import io.leavesfly.tinyai.nnet.core.Shape;
 
 /**
  * 示例6: Transformer模型
- * 
+ * <p>
  * 本示例展示如何:
  * 1. 使用多头注意力机制
  * 2. 使用位置编码
@@ -26,14 +26,14 @@ public class TransformerModel {
         private final PositionalEncoding posEnc;
         private final TransformerEncoderLayer encoderLayer;
 
-        public TransformerEncoder(String name, int dModel, int nHead, int dimFeedforward, 
-                                 int maxSeqLen, double dropout) {
+        public TransformerEncoder(String name, int dModel, int nHead, int dimFeedforward,
+                                  int maxSeqLen, float dropout) {
             super(name);
-            
+
             posEnc = new PositionalEncoding("pos_enc", dModel, maxSeqLen, dropout);
-            encoderLayer = new TransformerEncoderLayer("encoder", dModel, nHead, 
-                                                       dimFeedforward, dropout, "pre");
-            
+            encoderLayer = new TransformerEncoderLayer("encoder", dModel, nHead,
+                    dimFeedforward, dropout, false);
+
             registerModule("pos_enc", posEnc);
             registerModule("encoder_layer", encoderLayer);
         }
@@ -41,13 +41,13 @@ public class TransformerModel {
         @Override
         public Variable forward(Variable... inputs) {
             Variable x = inputs[0]; // (batch_size, seq_len, d_model)
-            
+
             // 添加位置编码
             x = posEnc.forward(x);
-            
+
             // Transformer编码器层
             x = encoderLayer.forward(x);
-            
+
             return x;
         }
     }
@@ -60,13 +60,13 @@ public class TransformerModel {
         private final TransformerDecoderLayer decoderLayer;
 
         public TransformerDecoder(String name, int dModel, int nHead, int dimFeedforward,
-                                 int maxSeqLen, double dropout) {
+                                  int maxSeqLen, float dropout) {
             super(name);
-            
+
             posEnc = new PositionalEncoding("pos_dec", dModel, maxSeqLen, dropout);
             decoderLayer = new TransformerDecoderLayer("decoder", dModel, nHead,
-                                                       dimFeedforward, dropout, "pre");
-            
+                    dimFeedforward, dropout, false);
+
             registerModule("pos_dec", posEnc);
             registerModule("decoder_layer", decoderLayer);
         }
@@ -75,13 +75,13 @@ public class TransformerModel {
         public Variable forward(Variable... inputs) {
             Variable tgt = inputs[0];    // (batch_size, tgt_len, d_model)
             Variable memory = inputs[1]; // (batch_size, src_len, d_model)
-            
+
             // 添加位置编码
             tgt = posEnc.forward(tgt);
-            
+
             // Transformer解码器层
             tgt = decoderLayer.forward(tgt, memory);
-            
+
             return tgt;
         }
     }
@@ -95,15 +95,15 @@ public class TransformerModel {
         int nHead = 4;        // 注意力头数
         int dimFeedforward = 256; // 前馈网络维度
         int maxSeqLen = 100;  // 最大序列长度
-        double dropout = 0.1;
+        float dropout = 0.1f;
 
         // 示例1: 多头注意力
         System.out.println("示例1: 多头注意力（Multi-Head Attention）");
         System.out.println("----------------------------------------");
-        
+
         MultiHeadAttention mha = new MultiHeadAttention("mha", dModel, nHead, dropout);
         mha.eval();
-        
+
         System.out.println("配置:");
         System.out.println("  模型维度 (d_model): " + dModel);
         System.out.println("  注意力头数 (n_head): " + nHead);
@@ -118,7 +118,7 @@ public class TransformerModel {
         Variable q = new Variable(NdArray.of(qkvData, Shape.of(batchSize, seqLen, dModel)));
         Variable k = new Variable(NdArray.of(qkvData, Shape.of(batchSize, seqLen, dModel)));
         Variable v = new Variable(NdArray.of(qkvData, Shape.of(batchSize, seqLen, dModel)));
-        
+
         System.out.println("输入:");
         System.out.println("  Query (Q): " + shapeToString(q.getValue().getShape()));
         System.out.println("  Key (K):   " + shapeToString(k.getValue().getShape()));
@@ -134,10 +134,10 @@ public class TransformerModel {
         // 示例2: 位置编码
         System.out.println("\n示例2: 位置编码（Positional Encoding）");
         System.out.println("----------------------------------------");
-        
+
         PositionalEncoding posEnc = new PositionalEncoding("pos_enc", dModel, maxSeqLen, dropout);
         posEnc.eval();
-        
+
         System.out.println("配置:");
         System.out.println("  模型维度: " + dModel);
         System.out.println("  最大序列长度: " + maxSeqLen);
@@ -152,10 +152,10 @@ public class TransformerModel {
         System.out.println("输出:");
         System.out.println("  形状: " + shapeToString(posOutput.getValue().getShape()));
         System.out.println("  说明: 位置编码为序列添加了位置信息");
-        
+
         // 显示位置编码的效果
-        float[] inputData = posInput.getValue().toFloatArray();
-        float[] outputData = posOutput.getValue().toFloatArray();
+        float[] inputData = posInput.getValue().getArray();
+        float[] outputData = posOutput.getValue().getArray();
         System.out.println("\n  第一个位置的前5个维度:");
         System.out.println("    原始:         位置编码后:");
         for (int i = 0; i < 5; i++) {
@@ -166,11 +166,11 @@ public class TransformerModel {
         // 示例3: Transformer编码器
         System.out.println("\n示例3: Transformer编码器");
         System.out.println("----------------------------------------");
-        
-        TransformerEncoder encoder = new TransformerEncoder("encoder", dModel, nHead, 
-                                                           dimFeedforward, maxSeqLen, dropout);
+
+        TransformerEncoder encoder = new TransformerEncoder("encoder", dModel, nHead,
+                dimFeedforward, maxSeqLen, dropout);
         encoder.eval();
-        
+
         System.out.println("配置:");
         System.out.println("  模型维度: " + dModel);
         System.out.println("  注意力头数: " + nHead);
@@ -179,8 +179,8 @@ public class TransformerModel {
 
         System.out.println("参数统计:");
         long encoderParams = 0;
-        for (String name : encoder.parameters().keySet()) {
-            long count = encoder.parameters().get(name).data().size();
+        for (String name : encoder.namedParameters().keySet()) {
+            long count = encoder.namedParameters().entrySet().size();
             encoderParams += count;
         }
         System.out.println("  总参数量: " + encoderParams);
@@ -200,11 +200,11 @@ public class TransformerModel {
         // 示例4: Transformer解码器
         System.out.println("\n示例4: Transformer解码器");
         System.out.println("----------------------------------------");
-        
+
         TransformerDecoder decoder = new TransformerDecoder("decoder", dModel, nHead,
-                                                           dimFeedforward, maxSeqLen, dropout);
+                dimFeedforward, maxSeqLen, dropout);
         decoder.eval();
-        
+
         System.out.println("配置:");
         System.out.println("  模型维度: " + dModel);
         System.out.println("  注意力头数: " + nHead);
@@ -213,8 +213,8 @@ public class TransformerModel {
 
         System.out.println("参数统计:");
         long decoderParams = 0;
-        for (String name : decoder.parameters().keySet()) {
-            long count = decoder.parameters().get(name).data().size();
+        for (String name : decoder.namedParameters().keySet()) {
+            long count = decoder.namedParameters().entrySet().size();
             decoderParams += count;
         }
         System.out.println("  总参数量: " + decoderParams);
@@ -227,7 +227,7 @@ public class TransformerModel {
             tgtData[i] = (float) (Math.random() * 0.1 - 0.05);
         }
         Variable tgtInput = new Variable(NdArray.of(tgtData, Shape.of(batchSize, tgtLen, dModel)));
-        
+
         System.out.println("输入:");
         System.out.println("  目标序列: " + shapeToString(tgtInput.getValue().getShape()));
         System.out.println("  记忆（编码器输出）: " + shapeToString(encoderOutput.getValue().getShape()));

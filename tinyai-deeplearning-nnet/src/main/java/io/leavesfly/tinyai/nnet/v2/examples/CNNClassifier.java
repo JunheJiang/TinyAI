@@ -1,18 +1,18 @@
 package io.leavesfly.tinyai.nnet.v2.examples;
 
+import io.leavesfly.tinyai.func.Variable;
+import io.leavesfly.tinyai.ndarr.NdArray;
+import io.leavesfly.tinyai.ndarr.Shape;
 import io.leavesfly.tinyai.nnet.v2.core.Module;
 import io.leavesfly.tinyai.nnet.v2.layer.conv.Conv2d;
 import io.leavesfly.tinyai.nnet.v2.layer.conv.MaxPool2d;
 import io.leavesfly.tinyai.nnet.v2.layer.activation.ReLU;
 import io.leavesfly.tinyai.nnet.v2.layer.dnn.Linear;
 import io.leavesfly.tinyai.nnet.v2.layer.dnn.Dropout;
-import io.leavesfly.tinyai.nnet.autodiff.Variable;
-import io.leavesfly.tinyai.nnet.core.NdArray;
-import io.leavesfly.tinyai.nnet.core.Shape;
 
 /**
  * 示例3: 卷积神经网络（CNN）分类器
- * 
+ * <p>
  * 本示例展示如何:
  * 1. 构建完整的CNN分类器
  * 2. 使用卷积层、池化层和全连接层
@@ -28,45 +28,45 @@ public class CNNClassifier {
         private final Conv2d conv1;
         private final ReLU relu1;
         private final MaxPool2d pool1;
-        
+
         private final Conv2d conv2;
         private final ReLU relu2;
         private final MaxPool2d pool2;
-        
+
         private final Linear fc1;
         private final ReLU relu3;
         private final Dropout dropout;
-        
+
         private final Linear fc2;
         private final ReLU relu4;
-        
+
         private final Linear fc3;
 
         public LeNet5(String name, int numClasses) {
             super(name);
-            
+
             // 卷积层1: 1 -> 6 channels, 5x5 kernel
             conv1 = new Conv2d("conv1", 1, 6, 5, 5, 1, 0, true);
             relu1 = new ReLU("relu1");
-            pool1 = new MaxPool2d("pool1", 2, 2);
-            
+            pool1 = new MaxPool2d("pool1", 2, 2, 2);
+
             // 卷积层2: 6 -> 16 channels, 5x5 kernel
             conv2 = new Conv2d("conv2", 6, 16, 5, 5, 1, 0, true);
             relu2 = new ReLU("relu2");
-            pool2 = new MaxPool2d("pool2", 2, 2);
-            
+            pool2 = new MaxPool2d("pool2", 2, 2, 2);
+
             // 全连接层1: 16*4*4 -> 120
             fc1 = new Linear("fc1", 16 * 4 * 4, 120, true);
             relu3 = new ReLU("relu3");
-            dropout = new Dropout("dropout", 0.5);
-            
+            dropout = new Dropout("dropout", 0.5f);
+
             // 全连接层2: 120 -> 84
             fc2 = new Linear("fc2", 120, 84, true);
             relu4 = new ReLU("relu4");
-            
+
             // 输出层: 84 -> numClasses
             fc3 = new Linear("fc3", 84, numClasses, true);
-            
+
             // 注册所有子模块
             registerModule("conv1", conv1);
             registerModule("relu1", relu1);
@@ -85,57 +85,58 @@ public class CNNClassifier {
         @Override
         public Variable forward(Variable... inputs) {
             Variable x = inputs[0];
-            
+
             // 卷积块1: Conv -> ReLU -> Pool
             // (N, 1, 28, 28) -> (N, 6, 24, 24) -> (N, 6, 12, 12)
             x = conv1.forward(x);
             x = relu1.forward(x);
             x = pool1.forward(x);
-            
+
             // 卷积块2: Conv -> ReLU -> Pool
             // (N, 6, 12, 12) -> (N, 16, 8, 8) -> (N, 16, 4, 4)
             x = conv2.forward(x);
             x = relu2.forward(x);
             x = pool2.forward(x);
-            
+
             // 展平: (N, 16, 4, 4) -> (N, 256)
             x = flatten(x);
-            
+
             // 全连接块1
             x = fc1.forward(x);
             x = relu3.forward(x);
             x = dropout.forward(x);
-            
+
             // 全连接块2
             x = fc2.forward(x);
             x = relu4.forward(x);
-            
+
             // 输出层
             x = fc3.forward(x);
-            
+
             return x;
         }
 
         /**
          * 将4D张量展平为2D张量
+         *
          * @param x 输入变量，形状为 (N, C, H, W)
          * @return 展平后的变量，形状为 (N, C*H*W)
          */
         private Variable flatten(Variable x) {
             NdArray data = x.getValue();
             int[] shape = data.getShape().getShape();
-            
+
             if (shape.length != 4) {
                 throw new IllegalArgumentException("Expected 4D input, got " + shape.length + "D");
             }
-            
+
             int batchSize = shape[0];
             int flatSize = shape[1] * shape[2] * shape[3];
-            
+
             // 重塑为 (batch_size, flat_size)
-            float[] flatData = data.toFloatArray();
+            float[] flatData = data.getArray();
             NdArray flatArray = NdArray.of(flatData, Shape.of(batchSize, flatSize));
-            
+
             return new Variable(flatArray);
         }
     }
@@ -152,7 +153,7 @@ public class CNNClassifier {
         // 2. 查看模型结构
         System.out.println("2. 模型结构:");
         System.out.println("   子模块:");
-        for (String name : model.modules().keySet()) {
+        for (String name : model.namedModules().keySet()) {
             System.out.println("   - " + name);
         }
         System.out.println();
@@ -161,12 +162,12 @@ public class CNNClassifier {
         System.out.println("3. 参数统计:");
         long totalParams = 0;
         System.out.println("   各层参数:");
-        for (String name : model.parameters().keySet()) {
-            NdArray param = model.parameters().get(name).data();
-            long paramCount = param.size();
+        for (String name : model.namedParameters().keySet()) {
+            NdArray param = model.namedParameters().get(name).data();
+            long paramCount = 1;
             totalParams += paramCount;
-            System.out.println("   - " + name + ": " + 
-                             shapeToString(param.getShape()) + " = " + paramCount);
+            System.out.println("   - " + name + ": " +
+                    shapeToString(param.getShape()) + " = " + paramCount);
         }
         System.out.println("   总参数量: " + totalParams);
         System.out.println();
@@ -174,7 +175,7 @@ public class CNNClassifier {
         // 4. 训练模式前向传播
         System.out.println("4. 训练模式前向传播:");
         model.train();
-        
+
         // 创建模拟的MNIST图像 (batch_size=4, channels=1, height=28, width=28)
         float[] imageData = new float[4 * 1 * 28 * 28];
         for (int i = 0; i < imageData.length; i++) {
@@ -182,13 +183,13 @@ public class CNNClassifier {
         }
         NdArray imageArray = NdArray.of(imageData, Shape.of(4, 1, 28, 28));
         Variable input = new Variable(imageArray);
-        
+
         System.out.println("   输入形状: [4, 1, 28, 28]");
         Variable output = model.forward(input);
         System.out.println("   输出形状: " + shapeToString(output.getValue().getShape()));
-        
+
         // 显示输出（logits）
-        float[] outputData = output.getValue().toFloatArray();
+        float[] outputData = output.getValue().getArray();
         System.out.println("   第一个样本的输出 (10个类别的logits):");
         for (int i = 0; i < 10; i++) {
             System.out.printf("     类别%d: %.4f%n", i, outputData[i]);
@@ -198,12 +199,12 @@ public class CNNClassifier {
         // 5. 推理模式前向传播
         System.out.println("5. 推理模式前向传播:");
         model.eval();
-        
+
         output = model.forward(input);
         System.out.println("   输出形状: " + shapeToString(output.getValue().getShape()));
-        
+
         // 找到预测类别
-        outputData = output.getValue().toFloatArray();
+        outputData = output.getValue().getArray();
         System.out.println("   预测结果:");
         for (int n = 0; n < 4; n++) {
             int maxIdx = 0;

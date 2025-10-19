@@ -40,12 +40,12 @@ public class BatchNorm1d extends Module {
     /**
      * 构造函数
      *
-     * @param name               层名称
-     * @param numFeatures        特征维度
-     * @param eps                数值稳定项（默认1e-5）
-     * @param momentum           移动平均动量（默认0.1）
-     * @param affine             是否使用可学习参数（默认true）
-     * @param trackRunningStats  是否跟踪统计量（默认true）
+     * @param name              层名称
+     * @param numFeatures       特征维度
+     * @param eps               数值稳定项（默认1e-5）
+     * @param momentum          移动平均动量（默认0.1）
+     * @param affine            是否使用可学习参数（默认true）
+     * @param trackRunningStats 是否跟踪统计量（默认true）
      */
     public BatchNorm1d(String name, int numFeatures, float eps, float momentum,
                        boolean affine, boolean trackRunningStats) {
@@ -69,17 +69,17 @@ public class BatchNorm1d extends Module {
 
         // 创建移动平均缓冲区
         if (trackRunningStats) {
-            NdArray runningMean = NdArray.of(new double[numFeatures], Shape.of(numFeatures));
-            NdArray runningVar = NdArray.of(new double[numFeatures], Shape.of(numFeatures));
+            NdArray runningMean = NdArray.of(new float[numFeatures], Shape.of(numFeatures));
+            NdArray runningVar = NdArray.of(new float[numFeatures], Shape.of(numFeatures));
             // 初始化 running_var 为 1
             for (int i = 0; i < numFeatures; i++) {
-                runningVar.getArray()[i] = 1.0;
+                runningVar.getArray()[i] = 1.0f;
             }
             registerBuffer("running_mean", runningMean);
             registerBuffer("running_var", runningVar);
 
             // 记录处理的批次数（可选）
-            registerBuffer("num_batches_tracked", NdArray.of(new double[]{0}, Shape.of(1)));
+            registerBuffer("num_batches_tracked", NdArray.of(new float[]{0}, Shape.of(1)));
         }
 
         // 初始化参数
@@ -116,15 +116,15 @@ public class BatchNorm1d extends Module {
             NdArray runningVar = getBuffer("running_var");
 
             // running_mean 初始化为 0
-            double[] meanData = runningMean.getArray();
+            float[] meanData = runningMean.getArray();
             for (int i = 0; i < meanData.length; i++) {
-                meanData[i] = 0.0;
+                meanData[i] = 0.0f;
             }
 
             // running_var 初始化为 1
-            double[] varData = runningVar.getArray();
+            float[] varData = runningVar.getArray();
             for (int i = 0; i < varData.length; i++) {
-                varData[i] = 1.0;
+                varData[i] = 1.0f;
             }
 
             // 重置批次计数
@@ -139,7 +139,7 @@ public class BatchNorm1d extends Module {
     public Variable forward(Variable... inputs) {
         Variable x = inputs[0];
         NdArray inputData = x.getValue();
-        int[] dims = inputData.getShape().getDims();
+        int[] dims = inputData.getShape().getShape();
 
         // 输入形状检查：(batch_size, num_features) 或 (batch_size, num_features, length)
         if (dims.length < 2 || dims[1] != numFeatures) {
@@ -220,7 +220,7 @@ public class BatchNorm1d extends Module {
     private Variable normalize(Variable x, Variable mean, Variable var) {
         // normalized = (x - mean) / sqrt(var + eps)
         Variable centered = x.sub(mean);
-        Variable std = var.add(eps).sqrt();
+        Variable std = var.add(new Variable(eps)).sqrt();
         return centered.div(std);
     }
 
@@ -249,10 +249,10 @@ public class BatchNorm1d extends Module {
         NdArray runningMean = getBuffer("running_mean");
         NdArray runningVar = getBuffer("running_var");
 
-        double[] runningMeanData = runningMean.getArray();
-        double[] runningVarData = runningVar.getArray();
-        double[] batchMeanData = batchMean.getArray();
-        double[] batchVarData = batchVar.getArray();
+        float[] runningMeanData = runningMean.getArray();
+        float[] runningVarData = runningVar.getArray();
+        float[] batchMeanData = batchMean.getArray();
+        float[] batchVarData = batchVar.getArray();
 
         // 移动平均更新：
         // running_stat = (1 - momentum) * running_stat + momentum * batch_stat

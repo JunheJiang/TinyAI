@@ -56,7 +56,7 @@ public class SoftMax extends Module {
         // 1. 减去最大值（数值稳定性）
         // 2. 计算exp
         // 3. 归一化
-        return x.softmax(axis);
+        return x.softMax();
     }
 
     @Override

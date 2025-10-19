@@ -1,13 +1,14 @@
 package io.leavesfly.tinyai.nnet.v2.examples;
 
+import io.leavesfly.tinyai.func.Variable;
+import io.leavesfly.tinyai.ndarr.NdArray;
+import io.leavesfly.tinyai.ndarr.Shape;
 import io.leavesfly.tinyai.nnet.v2.core.Module;
 import io.leavesfly.tinyai.nnet.v2.layer.dnn.LazyLinear;
 import io.leavesfly.tinyai.nnet.v2.layer.conv.LazyConv2d;
 import io.leavesfly.tinyai.nnet.v2.layer.activation.ReLU;
 import io.leavesfly.tinyai.nnet.v2.layer.conv.MaxPool2d;
-import io.leavesfly.tinyai.nnet.autodiff.Variable;
-import io.leavesfly.tinyai.nnet.core.NdArray;
-import io.leavesfly.tinyai.nnet.core.Shape;
+
 
 /**
  * 示例2: 延迟初始化的使用
@@ -69,11 +70,11 @@ public class LazyInitialization {
             // 输入通道数将在首次forward时自动推断
             conv1 = new LazyConv2d("conv1", 32, 3, 3, 1, 1, true);
             relu1 = new ReLU("relu1");
-            pool1 = new MaxPool2d("pool1", 2, 2);
+            pool1 = new MaxPool2d("pool1", 2, 2,2);
             
             conv2 = new LazyConv2d("conv2", 64, 3, 3, 1, 1, true);
             relu2 = new ReLU("relu2");
-            pool2 = new MaxPool2d("pool2", 2, 2);
+            pool2 = new MaxPool2d("pool2", 2, 2,2);
             
             registerModule("conv1", conv1);
             registerModule("relu1", relu1);
@@ -109,7 +110,7 @@ public class LazyInitialization {
         LazyNet lazyNet = new LazyNet("lazy_net");
         
         System.out.println("1. 创建模型后（初始化前）:");
-        System.out.println("   参数数量: " + lazyNet.parameters().size());
+        System.out.println("   参数数量: " + lazyNet.namedParameters().size());
         System.out.println("   注: 此时参数尚未创建，因为输入维度未知");
         System.out.println();
 
@@ -128,9 +129,9 @@ public class LazyInitialization {
         System.out.println();
 
         System.out.println("3. 初始化后:");
-        System.out.println("   参数数量: " + lazyNet.parameters().size());
-        for (String name : lazyNet.parameters().keySet()) {
-            Shape shape = lazyNet.parameters().get(name).data().getShape();
+        System.out.println("   参数数量: " + lazyNet.namedParameters().size());
+        for (String name : lazyNet.namedParameters().keySet()) {
+            Shape shape = lazyNet.namedParameters().get(name).data().getShape();
             System.out.println("   - " + name + ": " + shapeToString(shape));
         }
         System.out.println();
@@ -142,7 +143,7 @@ public class LazyInitialization {
         LazyCNN lazyCNN = new LazyCNN("lazy_cnn");
         
         System.out.println("1. 创建模型后（初始化前）:");
-        System.out.println("   参数数量: " + lazyCNN.parameters().size());
+        System.out.println("   参数数量: " + lazyCNN.namedParameters().size());
         System.out.println();
 
         // 创建输入数据 (batch_size=2, channels=3, height=32, width=32)
@@ -160,9 +161,9 @@ public class LazyInitialization {
         System.out.println();
 
         System.out.println("3. 初始化后:");
-        System.out.println("   参数数量: " + lazyCNN.parameters().size());
-        for (String name : lazyCNN.parameters().keySet()) {
-            Shape shape = lazyCNN.parameters().get(name).data().getShape();
+        System.out.println("   参数数量: " + lazyCNN.namedParameters().size());
+        for (String name : lazyCNN.namedParameters().keySet()) {
+            Shape shape = lazyCNN.namedParameters().get(name).data().getShape();
             System.out.println("   - " + name + ": " + shapeToString(shape));
         }
         System.out.println();

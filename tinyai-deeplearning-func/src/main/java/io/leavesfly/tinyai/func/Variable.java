@@ -262,6 +262,10 @@ public class Variable implements Serializable {
         }
     }
 
+    public Shape getShape() {
+        return value.getShape();
+    }
+
     public Function getCreator() {
         return creator;
     }

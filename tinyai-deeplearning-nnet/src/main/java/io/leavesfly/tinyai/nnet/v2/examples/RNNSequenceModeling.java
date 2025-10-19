@@ -1,17 +1,17 @@
 package io.leavesfly.tinyai.nnet.v2.examples;
 
+import io.leavesfly.tinyai.func.Variable;
+import io.leavesfly.tinyai.ndarr.NdArray;
+import io.leavesfly.tinyai.ndarr.Shape;
 import io.leavesfly.tinyai.nnet.v2.core.Module;
 import io.leavesfly.tinyai.nnet.v2.layer.rnn.LSTM;
 import io.leavesfly.tinyai.nnet.v2.layer.rnn.GRU;
 import io.leavesfly.tinyai.nnet.v2.layer.rnn.SimpleRNN;
 import io.leavesfly.tinyai.nnet.v2.layer.dnn.Linear;
-import io.leavesfly.tinyai.nnet.autodiff.Variable;
-import io.leavesfly.tinyai.nnet.core.NdArray;
-import io.leavesfly.tinyai.nnet.core.Shape;
 
 /**
  * 示例4: RNN序列建模
- * 
+ * <p>
  * 本示例展示如何:
  * 1. 使用LSTM、GRU、SimpleRNN处理序列数据
  * 2. 管理RNN的隐藏状态
@@ -29,10 +29,10 @@ public class RNNSequenceModeling {
 
         public LSTMClassifier(String name, int inputSize, int hiddenSize, int numClasses) {
             super(name);
-            
+
             lstm = new LSTM("lstm", inputSize, hiddenSize, true);
             fc = new Linear("fc", hiddenSize, numClasses, true);
-            
+
             registerModule("lstm", lstm);
             registerModule("fc", fc);
         }
@@ -40,35 +40,35 @@ public class RNNSequenceModeling {
         @Override
         public Variable forward(Variable... inputs) {
             Variable x = inputs[0]; // (seq_len, batch_size, input_size)
-            
+
             // 重置隐藏状态（对于每个新序列）
-            lstm.resetStates();
-            
+            lstm.resetState();
+
             // 处理序列
             int[] shape = x.getValue().getShape().getShape();
             int seqLen = shape[0];
             int batchSize = shape[1];
             int inputSize = shape[2];
-            
+
             Variable lastHidden = null;
             for (int t = 0; t < seqLen; t++) {
                 // 提取第t个时间步的输入
                 Variable xt = extractTimeStep(x, t, batchSize, inputSize);
-                
+
                 // LSTM前向传播
                 lastHidden = lstm.forward(xt);
             }
-            
+
             // 使用最后一个隐藏状态进行分类
             Variable output = fc.forward(lastHidden);
-            
+
             return output;
         }
 
         private Variable extractTimeStep(Variable x, int t, int batchSize, int inputSize) {
-            float[] data = x.getValue().toFloatArray();
+            float[] data = x.getValue().getArray();
             float[] stepData = new float[batchSize * inputSize];
-            
+
             for (int b = 0; b < batchSize; b++) {
                 for (int i = 0; i < inputSize; i++) {
                     int srcIdx = t * (batchSize * inputSize) + b * inputSize + i;
@@ -76,7 +76,7 @@ public class RNNSequenceModeling {
                     stepData[dstIdx] = data[srcIdx];
                 }
             }
-            
+
             return new Variable(NdArray.of(stepData, Shape.of(batchSize, inputSize)));
         }
     }
@@ -90,10 +90,10 @@ public class RNNSequenceModeling {
 
         public GRUClassifier(String name, int inputSize, int hiddenSize, int numClasses) {
             super(name);
-            
+
             gru = new GRU("gru", inputSize, hiddenSize, true);
             fc = new Linear("fc", hiddenSize, numClasses, true);
-            
+
             registerModule("gru", gru);
             registerModule("fc", fc);
         }
@@ -101,28 +101,28 @@ public class RNNSequenceModeling {
         @Override
         public Variable forward(Variable... inputs) {
             Variable x = inputs[0];
-            
-            gru.resetStates();
-            
+
+            gru.resetState();
+
             int[] shape = x.getValue().getShape().getShape();
             int seqLen = shape[0];
             int batchSize = shape[1];
             int inputSize = shape[2];
-            
+
             Variable lastHidden = null;
             for (int t = 0; t < seqLen; t++) {
                 Variable xt = extractTimeStep(x, t, batchSize, inputSize);
                 lastHidden = gru.forward(xt);
             }
-            
+
             Variable output = fc.forward(lastHidden);
             return output;
         }
 
         private Variable extractTimeStep(Variable x, int t, int batchSize, int inputSize) {
-            float[] data = x.getValue().toFloatArray();
+            float[] data = x.getValue().getArray();
             float[] stepData = new float[batchSize * inputSize];
-            
+
             for (int b = 0; b < batchSize; b++) {
                 for (int i = 0; i < inputSize; i++) {
                     int srcIdx = t * (batchSize * inputSize) + b * inputSize + i;
@@ -130,7 +130,7 @@ public class RNNSequenceModeling {
                     stepData[dstIdx] = data[srcIdx];
                 }
             }
-            
+
             return new Variable(NdArray.of(stepData, Shape.of(batchSize, inputSize)));
         }
     }
@@ -144,10 +144,10 @@ public class RNNSequenceModeling {
 
         public SimpleRNNClassifier(String name, int inputSize, int hiddenSize, int numClasses) {
             super(name);
-            
+
             rnn = new SimpleRNN("rnn", inputSize, hiddenSize, true, "tanh");
             fc = new Linear("fc", hiddenSize, numClasses, true);
-            
+
             registerModule("rnn", rnn);
             registerModule("fc", fc);
         }
@@ -155,28 +155,28 @@ public class RNNSequenceModeling {
         @Override
         public Variable forward(Variable... inputs) {
             Variable x = inputs[0];
-            
-            rnn.resetStates();
-            
+
+            rnn.resetState();
+
             int[] shape = x.getValue().getShape().getShape();
             int seqLen = shape[0];
             int batchSize = shape[1];
             int inputSize = shape[2];
-            
+
             Variable lastHidden = null;
             for (int t = 0; t < seqLen; t++) {
                 Variable xt = extractTimeStep(x, t, batchSize, inputSize);
                 lastHidden = rnn.forward(xt);
             }
-            
+
             Variable output = fc.forward(lastHidden);
             return output;
         }
 
         private Variable extractTimeStep(Variable x, int t, int batchSize, int inputSize) {
-            float[] data = x.getValue().toFloatArray();
+            float[] data = x.getValue().getArray();
             float[] stepData = new float[batchSize * inputSize];
-            
+
             for (int b = 0; b < batchSize; b++) {
                 for (int i = 0; i < inputSize; i++) {
                     int srcIdx = t * (batchSize * inputSize) + b * inputSize + i;
@@ -184,7 +184,7 @@ public class RNNSequenceModeling {
                     stepData[dstIdx] = data[srcIdx];
                 }
             }
-            
+
             return new Variable(NdArray.of(stepData, Shape.of(batchSize, inputSize)));
         }
     }
@@ -209,14 +209,14 @@ public class RNNSequenceModeling {
         // 示例1: LSTM分类器
         System.out.println("示例1: LSTM序列分类器");
         System.out.println("----------------------------------------");
-        
+
         LSTMClassifier lstmModel = new LSTMClassifier("lstm_classifier", inputSize, hiddenSize, numClasses);
         lstmModel.eval();
-        
+
         System.out.println("1. 模型参数:");
         long lstmParams = 0;
-        for (String name : lstmModel.parameters().keySet()) {
-            long count = lstmModel.parameters().get(name).data().size();
+        for (String name : lstmModel.namedParameters().keySet()) {
+            long count = 1;
             lstmParams += count;
             System.out.println("   - " + name + ": " + count);
         }
@@ -227,8 +227,8 @@ public class RNNSequenceModeling {
         System.out.println("   输入形状: [" + seqLen + ", " + batchSize + ", " + inputSize + "]");
         Variable lstmOutput = lstmModel.forward(input);
         System.out.println("   输出形状: " + shapeToString(lstmOutput.getValue().getShape()));
-        
-        float[] lstmOutputData = lstmOutput.getValue().toFloatArray();
+
+        float[] lstmOutputData = lstmOutput.getValue().getArray();
         System.out.println("   第一个样本的预测:");
         for (int i = 0; i < numClasses; i++) {
             System.out.printf("     类别%d: %.4f%n", i, lstmOutputData[i]);
@@ -238,14 +238,14 @@ public class RNNSequenceModeling {
         // 示例2: GRU分类器
         System.out.println("\n示例2: GRU序列分类器");
         System.out.println("----------------------------------------");
-        
+
         GRUClassifier gruModel = new GRUClassifier("gru_classifier", inputSize, hiddenSize, numClasses);
         gruModel.eval();
-        
+
         System.out.println("1. 模型参数:");
         long gruParams = 0;
-        for (String name : gruModel.parameters().keySet()) {
-            long count = gruModel.parameters().get(name).data().size();
+        for (String name : gruModel.namedParameters().keySet()) {
+            long count = 1;
             gruParams += count;
             System.out.println("   - " + name + ": " + count);
         }
@@ -255,8 +255,8 @@ public class RNNSequenceModeling {
         System.out.println("2. 前向传播:");
         Variable gruOutput = gruModel.forward(input);
         System.out.println("   输出形状: " + shapeToString(gruOutput.getValue().getShape()));
-        
-        float[] gruOutputData = gruOutput.getValue().toFloatArray();
+
+        float[] gruOutputData = gruOutput.getValue().getArray();
         System.out.println("   第一个样本的预测:");
         for (int i = 0; i < numClasses; i++) {
             System.out.printf("     类别%d: %.4f%n", i, gruOutputData[i]);
@@ -266,14 +266,14 @@ public class RNNSequenceModeling {
         // 示例3: SimpleRNN分类器
         System.out.println("\n示例3: SimpleRNN序列分类器");
         System.out.println("----------------------------------------");
-        
+
         SimpleRNNClassifier rnnModel = new SimpleRNNClassifier("rnn_classifier", inputSize, hiddenSize, numClasses);
         rnnModel.eval();
-        
+
         System.out.println("1. 模型参数:");
         long rnnParams = 0;
-        for (String name : rnnModel.parameters().keySet()) {
-            long count = rnnModel.parameters().get(name).data().size();
+        for (String name : rnnModel.namedParameters().keySet()) {
+            long count = 1;
             rnnParams += count;
             System.out.println("   - " + name + ": " + count);
         }
@@ -283,8 +283,8 @@ public class RNNSequenceModeling {
         System.out.println("2. 前向传播:");
         Variable rnnOutput = rnnModel.forward(input);
         System.out.println("   输出形状: " + shapeToString(rnnOutput.getValue().getShape()));
-        
-        float[] rnnOutputData = rnnOutput.getValue().toFloatArray();
+
+        float[] rnnOutputData = rnnOutput.getValue().getArray();
         System.out.println("   第一个样本的预测:");
         for (int i = 0; i < numClasses; i++) {
             System.out.printf("     类别%d: %.4f%n", i, rnnOutputData[i]);

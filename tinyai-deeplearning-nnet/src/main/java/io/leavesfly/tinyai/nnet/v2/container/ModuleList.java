@@ -103,7 +103,7 @@ public class ModuleList extends Module implements Iterable<Module> {
         // 更新注册
         String moduleName = String.valueOf(index);
         _modules.put(moduleName, module);
-        module._parent = this;
+        module.set_parent(this);
 
         return oldModule;
     }

@@ -78,7 +78,7 @@ public class LayerNorm extends Module {
         Variable variance = x.var(-1, true);
 
         // 归一化
-        Variable normalized = x.sub(mean).div(variance.add(eps).sqrt());
+        Variable normalized = x.sub(mean).div(variance.add(new Variable(eps)).sqrt());
 
         // 应用缩放和偏移
         return normalized.mul(gamma).add(beta);

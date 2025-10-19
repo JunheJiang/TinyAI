@@ -71,10 +71,10 @@ public class Dropout extends Module {
 
         // 生成dropout mask
         NdArray mask = generateMask(x.getValue());
-        
+
         // 应用mask并缩放（inverted dropout）
         Variable masked = x.mul(new Variable(mask));
-        return masked.mulNum(1.0f / (1 - p));
+        return masked.mul(new Variable(NdArray.of(1.0f / (1 - p))));
     }
 
     /**
