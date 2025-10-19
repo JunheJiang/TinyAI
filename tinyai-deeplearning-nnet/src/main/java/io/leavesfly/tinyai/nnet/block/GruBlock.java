@@ -39,9 +39,9 @@ public class GruBlock extends Block {
      * @param outputSize 输出维度
      */
     public GruBlock(String name, int inputSize, int hiddenSize, int outputSize) {
-        super(name, Shape.of(-1, inputSize), Shape.of(-1, outputSize));
+        super(name);
 
-        gruLayer = new GruLayer("gru", Shape.of(-1, inputSize), Shape.of(-1, hiddenSize));
+        gruLayer = new GruLayer("gru");
         addLayer(gruLayer);
 
         linearLayer = new LinearLayer("line", hiddenSize, outputSize, true);

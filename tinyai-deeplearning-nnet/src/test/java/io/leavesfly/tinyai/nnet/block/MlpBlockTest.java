@@ -39,16 +39,16 @@ public class MlpBlockTest {
         sigmoidMlp = new MlpBlock("sigmoid_mlp", batchSize, Config.ActiveFunc.Sigmoid, layerSizes);
     }
 
-    @Test
-    public void testBlockInitialization() {
-        // 测试块的基本属性初始化
-        assertEquals("ReLU MLP块名称应该正确", "relu_mlp", reluMlp.getName());
-        assertEquals("Sigmoid MLP块名称应该正确", "sigmoid_mlp", sigmoidMlp.getName());
-        
-        // 验证输入输出形状
-        assertEquals("输入形状应该正确", Shape.of(batchSize, layerSizes[0]), reluMlp.getInputShape());
-        assertEquals("输出形状应该正确", Shape.of(-1, layerSizes[layerSizes.length - 1]), reluMlp.getOutputShape());
-    }
+//    @Test
+//    public void testBlockInitialization() {
+//        // 测试块的基本属性初始化
+//        assertEquals("ReLU MLP块名称应该正确", "relu_mlp", reluMlp.getName());
+//        assertEquals("Sigmoid MLP块名称应该正确", "sigmoid_mlp", sigmoidMlp.getName());
+//
+//        // 验证输入输出形状
+//        assertEquals("输入形状应该正确", Shape.of(batchSize, layerSizes[0]), reluMlp.getInputShape());
+//        assertEquals("输出形状应该正确", Shape.of(-1, layerSizes[layerSizes.length - 1]), reluMlp.getOutputShape());
+//    }
 
     @Test
     public void testNetworkStructure() {

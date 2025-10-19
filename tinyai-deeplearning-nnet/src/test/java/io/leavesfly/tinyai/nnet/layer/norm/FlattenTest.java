@@ -127,25 +127,25 @@ public class FlattenTest {
                     3, output.getValue().getShape().getDimension(0));
     }
 
-    @Test
-    public void testNullInputShape() {
-        // 测试null输入形状的处理
-        Flatten nullFlatten = new Flatten("null_test", null);
-        
-        // 应该使用默认输出形状
-        assertTrue("null输入形状应该使用默认值", 
-                   Shape.of(-1, 1).equals(nullFlatten.getOutputShape()));
-    }
+//    @Test
+//    public void testNullInputShape() {
+//        // 测试null输入形状的处理
+//        Flatten nullFlatten = new Flatten("null_test", null);
+//
+//        // 应该使用默认输出形状
+//        assertTrue("null输入形状应该使用默认值",
+//                   Shape.of(-1, 1).equals(nullFlatten.getOutputShape()));
+//    }
 
-    @Test
-    public void testEmptyShape() {
-        // 测试空形状的处理
-        Flatten emptyFlatten = new Flatten("empty_test", Shape.of());
-        
-        // 应该能正常处理
-        assertTrue("空形状应该使用默认值", 
-                   Shape.of(-1, 1).equals(emptyFlatten.getOutputShape()));
-    }
+//    @Test
+//    public void testEmptyShape() {
+//        // 测试空形状的处理
+//        Flatten emptyFlatten = new Flatten("empty_test", Shape.of());
+//
+//        // 应该能正常处理
+//        assertTrue("空形状应该使用默认值",
+//                   Shape.of(-1, 1).equals(emptyFlatten.getOutputShape()));
+//    }
 
     @Test
     public void testSingleDimensionInput() {

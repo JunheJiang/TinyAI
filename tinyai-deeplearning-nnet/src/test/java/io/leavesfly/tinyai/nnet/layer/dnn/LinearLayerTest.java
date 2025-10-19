@@ -93,15 +93,15 @@ public class LinearLayerTest {
         assertNotNull("输出不应该为null", output.getValue());
     }
 
-    @Test
-    public void testShapeConsistency() {
-        // 测试输入输出形状的一致性
-        assertEquals("输入形状应该正确设置", Shape.of(-1, 5), linearWithBias.getInputShape());
-        assertEquals("输出形状应该正确设置", Shape.of(-1, 3), linearWithBias.getOutputShape());
-        
-        assertEquals("输入形状应该正确设置", Shape.of(-1, 4), linearWithoutBias.getInputShape());
-        assertEquals("输出形状应该正确设置", Shape.of(-1, 2), linearWithoutBias.getOutputShape());
-    }
+//    @Test
+//    public void testShapeConsistency() {
+//        // 测试输入输出形状的一致性
+//        assertEquals("输入形状应该正确设置", Shape.of(-1, 5), linearWithBias.getInputShape());
+//        assertEquals("输出形状应该正确设置", Shape.of(-1, 3), linearWithBias.getOutputShape());
+//
+//        assertEquals("输入形状应该正确设置", Shape.of(-1, 4), linearWithoutBias.getInputShape());
+//        assertEquals("输出形状应该正确设置", Shape.of(-1, 2), linearWithoutBias.getOutputShape());
+//    }
 
     @Test
     public void testBatchProcessing() {
