@@ -71,8 +71,7 @@ public class MultiHeadAttention extends Layer {
         }
     }
 
-    @Override
-    public Variable layerForward(Variable... inputs) {
+    private Variable layerForward0(Variable... inputs) {
         Variable query = inputs[0];
         Variable key = inputs.length > 1 ? inputs[1] : query;
         Variable value = inputs.length > 2 ? inputs[2] : key;
@@ -85,11 +84,11 @@ public class MultiHeadAttention extends Layer {
         int querySeqLen = queryData.getShape().getDimension(1);
         int keySeqLen = keyData.getShape().getDimension(1);
         int valueSeqLen = valueData.getShape().getDimension(1);
-        
+
         // 验证key和value的序列长度必须相同
         if (keySeqLen != valueSeqLen) {
             throw new IllegalArgumentException(
-                String.format("Key序列长度(%d)必须与Value序列长度(%d)相同", keySeqLen, valueSeqLen)
+                    String.format("Key序列长度(%d)必须与Value序列长度(%d)相同", keySeqLen, valueSeqLen)
             );
         }
 

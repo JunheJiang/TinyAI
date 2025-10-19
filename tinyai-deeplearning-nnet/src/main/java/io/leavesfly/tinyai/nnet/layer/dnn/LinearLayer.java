@@ -32,6 +32,11 @@ public class LinearLayer extends Layer {
      */
     private Parameter b;
 
+
+    public LinearLayer(String _name) {
+        super(_name);
+    }
+
     /**
      * 构造一个线性层实例
      *
@@ -41,7 +46,7 @@ public class LinearLayer extends Layer {
      * @param needBias  是否需要偏置项
      */
     public LinearLayer(String _name, int hiddenRow, int hiddenCol, boolean needBias) {
-        super(_name, Shape.of(-1, hiddenRow), Shape.of(-1, hiddenCol));
+        super(_name);
         NdArray initWeight = NdArray.likeRandomN(Shape.of(hiddenRow, hiddenCol)).mulNum(Math.sqrt((double) 1 / hiddenRow));
         w = new Parameter(initWeight);
         w.setName("w");

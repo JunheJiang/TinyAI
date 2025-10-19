@@ -12,32 +12,38 @@ import java.util.List;
 /**
  * 将矩阵打平层
  * 将多维输入重塑为二维输出，通常用在卷积层和全连接层之间
- * 
+ * <p>
  * 例如：(batch_size, height, width, channels) -> (batch_size, height*width*channels)
  */
 public class Flatten extends Layer {
 
     private Shape originalShape;  // 保存原始形状用于反向传播
-    
+
+
+    public Flatten(String _name) {
+        super(_name);
+    }
+
+
     /**
      * 构造函数
-     * 
-     * @param _name 层名称
+     *
+     * @param _name       层名称
      * @param _inputShape 输入形状
      */
     public Flatten(String _name, Shape _inputShape) {
         super(_name, _inputShape, calculateOutputShape(_inputShape));
     }
-    
+
     /**
      * 获取输出形状
-     * 
+     *
      * @return 输出形状
      */
     public Shape getOutputShape() {
         return outputShape;
     }
-    
+
     /**
      * 计算输出形状
      */
@@ -46,7 +52,7 @@ public class Flatten extends Layer {
         if (inputShape == null || inputShape.getDimNum() == 0) {
             return Shape.of(-1, 1);
         }
-        
+
         // 如果输入是一维的
         if (inputShape.getDimNum() == 1) {
             // 将一维输入转换为(batch_size, 1)的形式
@@ -54,11 +60,11 @@ public class Flatten extends Layer {
             int batchSize = inputShape.getDimension(0);
             return Shape.of(batchSize, 1);
         }
-        
+
         // 如果输入是二维或更高维度
         int batchSize = inputShape.getDimension(0);
         int flattenedSize = 1;
-        
+
         // 计算除了batch维度外的所有维度的乘积
         for (int i = 1; i < inputShape.getDimNum(); i++) {
             int dim = inputShape.getDimension(i);
@@ -66,7 +72,7 @@ public class Flatten extends Layer {
                 flattenedSize *= dim;
             }
         }
-        
+
         return Shape.of(batchSize, flattenedSize);
     }
 
@@ -76,34 +82,23 @@ public class Flatten extends Layer {
         alreadyInit = true;
     }
 
-    @Override
-    public Variable layerForward(Variable... inputs) {
-        Variable x = inputs[0];
-        originalShape = x.getValue().getShape();
-        
-        // 计算输出形状
-        Shape outputShape = calculateOutputShape(originalShape);
-        
-        // 重塑为二维
-        return x.reshape(outputShape);
-    }
-    
+
     @Override
     public NdArray forward(NdArray... inputs) {
         originalShape = inputs[0].getShape();
-        
+
         // 计算输出形状
         Shape outputShape = calculateOutputShape(originalShape);
-        
+
         return inputs[0].reshape(outputShape);
     }
-    
+
     @Override
     public List<NdArray> backward(NdArray yGrad) {
         // 反向传播时将梯度重塑回原始形状
         return Collections.singletonList(yGrad.reshape(originalShape));
     }
-    
+
     @Override
     public int requireInputNum() {
         return 1;

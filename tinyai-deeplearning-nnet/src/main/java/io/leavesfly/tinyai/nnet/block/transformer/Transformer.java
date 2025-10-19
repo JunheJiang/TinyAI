@@ -41,6 +41,9 @@ public class Transformer extends Block {
     private Encoder encoder;
     private Decoder decoder;
 
+    public Transformer(String _name) {
+        super(_name);
+    }
 
     public Transformer(String _name, Encoder encoder, Decoder decoder) {
         super(_name, encoder.getInputShape(), decoder.getOutputShape());

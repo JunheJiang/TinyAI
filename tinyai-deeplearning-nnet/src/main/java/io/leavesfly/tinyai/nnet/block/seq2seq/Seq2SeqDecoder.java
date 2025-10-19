@@ -22,11 +22,15 @@ public class Seq2SeqDecoder extends Decoder {
     private LinearLayer linearLayer;
 
     // 模型参数
-    private final int targetVocabSize;
-    private final int embeddingDim;
-    private final int hiddenSize;
-    private final int outputVocabSize;
+    private int targetVocabSize;
+    private int embeddingDim;
+    private int hiddenSize;
+    private int outputVocabSize;
     private boolean layersInitialized = false;
+
+    public Seq2SeqDecoder(String _name) {
+        super(_name);
+    }
 
     /**
      * 构造序列到序列解码器

@@ -64,15 +64,20 @@ public class Seq2SeqEncoder extends Encoder {
     private Dropout dropout;
 
     // 模型参数
-    private final int vocabSize;        // 词汇表大小
-    private final int embeddingDim;     // 嵌入维度
-    private final int hiddenSize;       // LSTM隐藏层大小
-    private final double dropoutRate;   // Dropout比率
+    private  int vocabSize;        // 词汇表大小
+    private  int embeddingDim;     // 嵌入维度
+    private  int hiddenSize;       // LSTM隐藏层大小
+    private  double dropoutRate;   // Dropout比率
 
     /**
      * 标记层是否已初始化
      */
     private boolean layersInitialized = false;
+
+
+    public Seq2SeqEncoder(String _name) {
+        super(_name);
+    }
 
     /**
      * 构造序列到序列编码器

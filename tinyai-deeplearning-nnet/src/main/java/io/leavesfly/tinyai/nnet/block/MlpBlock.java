@@ -26,6 +26,11 @@ public class MlpBlock extends Block {
      */
     Config.ActiveFunc activeFunc;
 
+
+    public MlpBlock(String _name) {
+        super(_name);
+    }
+
     /**
      * 构造函数，创建一个多层感知机块
      *
@@ -36,7 +41,7 @@ public class MlpBlock extends Block {
      */
     public MlpBlock(String _name, int batchSize, Config.ActiveFunc _activeFunc, int... layerSizes) {
 
-        super(_name, Shape.of(batchSize, layerSizes[0]), Shape.of(-1, layerSizes[layerSizes.length - 1]));
+        super(_name);
 
         activeFunc = _activeFunc;
 
@@ -49,8 +54,7 @@ public class MlpBlock extends Block {
                 addLayer(new SigmoidLayer("Sigmoid"));
             }
         }
-        Layer layer = new LinearLayer("layer" + (layerSizes.length - 1), layerSizes[(layerSizes.length - 2)]
-                , layerSizes[(layerSizes.length - 1)], true);
+        Layer layer = new LinearLayer("layer" + (layerSizes.length - 1), layerSizes[(layerSizes.length - 2)], layerSizes[(layerSizes.length - 1)], true);
         addLayer(layer);
     }
 

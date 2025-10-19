@@ -37,6 +37,11 @@ public class AffineLayer extends Layer {
      */
     private boolean needBias;
 
+
+    public AffineLayer(String _name) {
+        super(_name);
+    }
+
     /**
      * 构造一个仿射层实例
      *

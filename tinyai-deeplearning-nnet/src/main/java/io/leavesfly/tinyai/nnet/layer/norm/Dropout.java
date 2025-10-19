@@ -1,7 +1,5 @@
 package io.leavesfly.tinyai.nnet.layer.norm;
 
-
-import io.leavesfly.tinyai.func.Variable;
 import io.leavesfly.tinyai.ndarr.NdArray;
 import io.leavesfly.tinyai.ndarr.Shape;
 import io.leavesfly.tinyai.nnet.Layer;
@@ -17,13 +15,14 @@ public class Dropout extends Layer {
     private float ration;
     private NdArray mask;
 
-    public Dropout(String _name, float _ration, Shape _xInputShape) {
-        super(_name, _xInputShape, _xInputShape);
+
+    public Dropout(String _name, float _ration) {
+        super(_name);
         ration = _ration;
     }
 
-    public Dropout(String _name, float _ration) {
-        super(_name, null, null);
+    public Dropout(String _name, float _ration, Shape _xInputShape) {
+        super(_name, _xInputShape, _xInputShape);
         ration = _ration;
     }
 
@@ -33,11 +32,6 @@ public class Dropout extends Layer {
 
     }
 
-    @Override
-    public Variable layerForward(Variable... inputs) {
-
-        return this.call(inputs[0]);
-    }
 
     @Override
     public NdArray forward(NdArray... inputs) {

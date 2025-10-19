@@ -14,6 +14,11 @@ import io.leavesfly.tinyai.nnet.Block;
  */
 public class SequentialBlock extends Block {
 
+
+    public SequentialBlock(String _name) {
+        super(_name);
+    }
+
     /**
      * 构造函数，创建一个顺序块
      *

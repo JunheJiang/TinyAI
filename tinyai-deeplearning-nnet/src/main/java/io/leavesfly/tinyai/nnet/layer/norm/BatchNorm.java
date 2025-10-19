@@ -12,7 +12,7 @@ import java.util.List;
 /**
  * 批量归一化层
  * 实现Batch Normalization算法，提高训练稳定性和收敛速度
- * 
+ * <p>
  * 公式：BN(x) = γ * (x - μ) / σ + β
  * 其中：
  * - μ 是批次均值
@@ -26,14 +26,19 @@ public class BatchNorm extends Layer {
     private Parameter beta;   // 偏移参数
     private int numFeatures;  // 特征数量
     private double eps;       // 防止除零的小常数
-    
+
+
+    public BatchNorm(String _name) {
+        super(_name);
+    }
+
     /**
      * 构造批量归一化层
-     * 
-     * @param _name 层名称
+     *
+     * @param _name       层名称
      * @param _inputShape 输入形状
      * @param numFeatures 特征数量（通常是通道数）
-     * @param eps 防止除零的小常数
+     * @param eps         防止除零的小常数
      */
     public BatchNorm(String _name, Shape _inputShape, int numFeatures, double eps) {
         super(_name, _inputShape, _inputShape);
@@ -41,7 +46,7 @@ public class BatchNorm extends Layer {
         this.eps = eps;
         init();
     }
-    
+
     /**
      * 构造批量归一化层（使用默认eps）
      */
@@ -68,12 +73,12 @@ public class BatchNorm extends Layer {
             gamma = new Parameter(NdArray.ones(Shape.of(numFeatures)));
             gamma.setName(name + "_gamma");
             addParam("gamma", gamma);
-            
+
             // 初始化偏移参数β为0
             beta = new Parameter(NdArray.zeros(Shape.of(numFeatures)));
             beta.setName(name + "_beta");
             addParam("beta", beta);
-            
+
             alreadyInit = true;
         }
     }
@@ -82,29 +87,29 @@ public class BatchNorm extends Layer {
     public Variable layerForward(Variable... inputs) {
         Variable x = inputs[0];
         NdArray inputData = x.getValue();
-        
+
         // 计算批次维度的均值和方差
         // 假设输入形状为 (batch_size, features) 或 (batch_size, channels, height, width)
         Shape shape = inputData.getShape();
-        
+
         // 计算除了特征维度外的所有维度的均值
         Variable mean = calculateMean(x);
-        
+
         // 计算方差
         Variable variance = calculateVariance(x, mean);
-        
+
         // 归一化：(x - μ) / √(σ² + ε)
         Variable normalized = x.sub(mean).div(variance.add(new Variable(NdArray.of(eps))).pow(0.5f));
-        
+
         // 应用缩放和偏移：γ * normalized + β
         // 需要确保gamma和beta能够正确广播到normalized的形状
         Variable gammaBroadcasted = prepareParameterForBroadcast(gamma, shape);
         Variable betaBroadcasted = prepareParameterForBroadcast(beta, shape);
         Variable output = normalized.mul(gammaBroadcasted).add(betaBroadcasted);
-        
+
         return output;
     }
-    
+
     /**
      * 为广播准备参数（gamma或beta）
      * 对于4D输入(N, C, H, W)，将参数从(C,)重塑为(1, C, 1, 1)然后广播
@@ -112,7 +117,7 @@ public class BatchNorm extends Layer {
      */
     private Variable prepareParameterForBroadcast(Parameter param, Shape targetShape) {
         Variable paramVar = new Variable(param.getValue());
-        
+
         if (targetShape.getDimNum() == 4) {
             // 4D情况: (N, C, H, W)
             // 将参数从(C,)重塑为(1, C, 1, 1)
@@ -129,7 +134,7 @@ public class BatchNorm extends Layer {
             return paramVar.broadcastTo(targetShape);
         }
     }
-    
+
     /**
      * 计算批次均值
      * 对于2D输入(N, C): 沿轴0轴计算均值，结果形状(C,)
@@ -138,7 +143,7 @@ public class BatchNorm extends Layer {
     private Variable calculateMean(Variable x) {
         NdArray data = x.getValue();
         Shape shape = data.getShape();
-        
+
         if (shape.getDimNum() == 2) {
             // 2D情况: (N, C) -> 沿轴0轴计算均值
             NdArray meanData = data.mean(0); // 结果: (C,)
@@ -159,7 +164,7 @@ public class BatchNorm extends Layer {
             return totalMean.broadcastTo(shape);
         }
     }
-    
+
     /**
      * 计算批次方差
      * 对于2D输入(N, C): 沿轴0轴计算方差，结果形状(C,)
@@ -168,10 +173,10 @@ public class BatchNorm extends Layer {
     private Variable calculateVariance(Variable x, Variable mean) {
         Variable diff = x.sub(mean);
         Variable squaredDiff = diff.mul(diff);
-        
+
         NdArray data = x.getValue();
         Shape shape = data.getShape();
-        
+
         if (shape.getDimNum() == 2) {
             // 2D情况: (N, C) -> 沿轴0轴计算方差
             NdArray varData = squaredDiff.getValue().mean(0); // 结果: (C,)

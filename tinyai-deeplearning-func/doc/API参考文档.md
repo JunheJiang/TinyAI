@@ -693,7 +693,7 @@ if (step % truncateLength == 0) {
 
 - [TinyAI技术架构设计文档](./技术架构设计文档.md)
 - [TinyAI使用示例与最佳实践](./使用示例与最佳实践.md)
-- [TinyAI测试修复报告](./测试修复报告.md)
+- [TinyAI测试修复报告](./测试报告.md)
 
 ---
 

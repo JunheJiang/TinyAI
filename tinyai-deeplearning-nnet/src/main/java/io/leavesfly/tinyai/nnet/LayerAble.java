@@ -60,7 +60,7 @@ public abstract class LayerAble extends Function {
      * <p>
      * 可以基于Variable inputs上操作，生成 Variable result
      * 否则计算图断了。
-     *
+     * <p>
      * 如果重写了layerForward 就不需要实现
      * backward和forward。
      *
@@ -69,6 +69,7 @@ public abstract class LayerAble extends Function {
      */
     public Variable layerForward(Variable... inputs) {
         return call(inputs);
+
     }
 
 
@@ -138,6 +139,23 @@ public abstract class LayerAble extends Function {
     @Override
     public int requireInputNum() {
         return -1;
+    }
+
+
+    public void setInputShape(Shape inputShape) {
+        this.inputShape = inputShape;
+    }
+
+    public void setOutputShape(Shape outputShape) {
+        this.outputShape = outputShape;
+    }
+
+    public boolean isAlreadyInit() {
+        return alreadyInit;
+    }
+
+    public void setAlreadyInit(boolean alreadyInit) {
+        this.alreadyInit = alreadyInit;
     }
 
 }

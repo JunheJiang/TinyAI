@@ -45,6 +45,10 @@ public abstract class Decoder extends Block {
      */
     protected boolean stateInitialized = false;
 
+    public Decoder(String _name) {
+        super(_name);
+    }
+
     /**
      * 构造解码器实例
      *

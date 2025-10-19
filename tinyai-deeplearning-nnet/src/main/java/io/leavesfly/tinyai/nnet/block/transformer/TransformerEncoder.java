@@ -30,6 +30,11 @@ public class TransformerEncoder extends Encoder {
     private double dropoutRate;
     private int maxSeqLength;
 
+
+    public TransformerEncoder(String name) {
+        super(name);
+    }
+
     /**
      * 构造Transformer编码器
      *

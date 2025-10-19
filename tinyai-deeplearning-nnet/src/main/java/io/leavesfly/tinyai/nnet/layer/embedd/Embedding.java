@@ -43,6 +43,10 @@ public class Embedding extends Layer {
      */
     private int embedSize;
 
+    public Embedding(String _name) {
+        super(_name);
+    }
+
     /**
      * 构造函数，创建Embedding层实例
      *
@@ -73,8 +77,8 @@ public class Embedding extends Layer {
      * @param inputs 输入变量数组，包含词汇索引
      * @return 前向传播结果变量
      */
-    @Override
-    public Variable layerForward(Variable... inputs) {
+
+    private Variable layerForward0(Variable... inputs) {
         Variable input = inputs[0];
         NdArray inputValue = input.getValue();
 
@@ -87,10 +91,10 @@ public class Embedding extends Layer {
             // 二维输入 (batch_size, sequence_length)
             int batchSize = inputValue.getShape().getRow();
             int seqLength = inputValue.getShape().getColumn();
-            
+
             // 创建结果数组: (batch_size, sequence_length, embedding_dim)
             NdArray result = NdArray.zeros(Shape.of(batchSize, seqLength, embedSize));
-            
+
             // 为每个样本处理嵌入
             for (int i = 0; i < batchSize; i++) {
                 int[] slices = NdArrayUtil.toInt(inputValue.getMatrix()[i]);
@@ -102,12 +106,12 @@ public class Embedding extends Layer {
                     }
                 }
             }
-            
+
             // 如果序列长度为1，重新形状为 (batch_size, embedding_dim)
             if (seqLength == 1) {
                 result = result.reshape(Shape.of(batchSize, embedSize));
             }
-            
+
             return new Variable(result);
         } else {
             throw new IllegalArgumentException("Embedding层不支持该输入形状: " + inputValue.getShape());
@@ -123,7 +127,7 @@ public class Embedding extends Layer {
     @Override
     public NdArray forward(NdArray... inputs) {
         // Embedding层主要通过layerForward方法处理Variable输入
-        return null;
+        return layerForward0(new Variable(inputs[0])).getValue();
     }
 
     /**

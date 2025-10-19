@@ -15,6 +15,7 @@ import io.leavesfly.tinyai.ndarr.NdArray;
  */
 public class Parameter extends Variable {
 
+
     /**
      * 构造函数，使用指定的NdArray值创建Parameter实例
      *

@@ -44,17 +44,21 @@ public class EncoderDecoder extends Block {
     /**
      * 编码器实例
      */
-    private final Encoder encoder;
+    private  Encoder encoder;
 
     /**
      * 解码器实例
      */
-    private final Decoder decoder;
+    private  Decoder decoder;
 
     /**
      * 标记模型是否已初始化
      */
     private boolean modelInitialized = false;
+
+    public EncoderDecoder(String _name) {
+        super(_name);
+    }
 
     /**
      * 构造编码解码器组合模型

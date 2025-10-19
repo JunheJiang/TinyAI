@@ -1,6 +1,5 @@
 package io.leavesfly.tinyai.nnet.block;
 
-import io.leavesfly.tinyai.func.Variable;
 import io.leavesfly.tinyai.ndarr.Shape;
 import io.leavesfly.tinyai.nnet.Block;
 import io.leavesfly.tinyai.nnet.layer.dnn.LinearLayer;
@@ -25,6 +24,11 @@ public class SimpleRnnBlock extends Block {
      * 线性输出层，用于将RNN的输出映射到目标维度
      */
     private LinearLayer linearLayer;
+
+
+    public SimpleRnnBlock(String name) {
+        super(name);
+    }
 
     /**
      * 构造函数，创建一个简单的RNN块
@@ -51,10 +55,4 @@ public class SimpleRnnBlock extends Block {
 
     }
 
-    @Override
-    public Variable layerForward(Variable... inputs) {
-
-        Variable state = rnnLayer.layerForward(inputs);
-        return linearLayer.layerForward(state);
-    }
 }

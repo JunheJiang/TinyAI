@@ -110,7 +110,7 @@ public class GruLayer extends Layer {
      * 隐藏层大小
      */
     private int hiddenSize;
-    
+
     /**
      * 当前状态的批大小
      * 用于检测批大小变化并重置状态
@@ -173,6 +173,11 @@ public class GruLayer extends Layer {
      * (1 - 更新门)的值，用于计算当前状态
      */
     private Variable oneMinusZ;
+
+
+    public GruLayer(String _name) {
+        super(_name);
+    }
 
     /**
      * 构造一个GRU层实例
@@ -257,71 +262,6 @@ public class GruLayer extends Layer {
         addParam(b_h.getName(), b_h);
     }
 
-    @Override
-    public Variable layerForward(Variable... inputs) {
-        Variable x = inputs[0];
-        int inputBatchSize = x.getValue().getShape().getRow();
-        
-        // 检测批大小变化，如果变化则重置状态
-        if (currentBatchSize != -1 && currentBatchSize != inputBatchSize) {
-            // 批大小变化，重置状态以适应新的批大小
-            resetState();
-        }
-        currentBatchSize = inputBatchSize;
-
-        if (Objects.isNull(state)) {
-            // 第一次前向传播
-            // 计算更新门
-            x_z = x.linear(w_z, b_z);
-            zGate = x_z.sigmoid();
-
-            // 计算重置门
-            x_r = x.linear(w_r, b_r);
-            rGate = x_r.sigmoid();
-
-            // 计算候选状态
-            x_h = x.linear(w_h, b_h);
-            hCandidate = x_h.tanh();
-
-            // 计算当前状态
-            oneMinusZ = new Variable(NdArray.ones(zGate.getValue().getShape())).sub(zGate);
-            state = oneMinusZ.mul(hCandidate);
-            stateValue = state.getValue();
-        } else {
-            // 后续前向传播
-            // 检查状态形状是否与当前输入匹配
-            if (state.getValue().getShape().getRow() != inputBatchSize) {
-                // 状态批大小不匹配，重新初始化状态
-                resetState();
-                return layerForward(inputs); // 递归调用处理重置后的状态
-            }
-            
-            // 计算更新门
-            x_z = x.linear(w_z, b_z);
-            h_z = state.linear(u_z, null);
-            zGate = x_z.add(h_z).sigmoid();
-
-            // 计算重置门
-            x_r = x.linear(w_r, b_r);
-            h_r = state.linear(u_r, null);
-            rGate = x_r.add(h_r).sigmoid();
-
-            // 重置前一状态
-            resetState = rGate.mul(state);
-
-            // 计算候选状态
-            x_h = x.linear(w_h, b_h);
-            h_h = resetState.linear(u_h, null);
-            hCandidate = x_h.add(h_h).tanh();
-
-            // 计算当前状态
-            oneMinusZ = new Variable(NdArray.ones(zGate.getValue().getShape())).sub(zGate);
-            state = zGate.mul(state).add(oneMinusZ.mul(hCandidate));
-            stateValue = state.getValue();
-        }
-
-        return state;
-    }
 
     @Override
     public NdArray forward(NdArray... inputs) {

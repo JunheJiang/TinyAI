@@ -26,6 +26,11 @@ public class PositionalEncoding extends Layer {
     private boolean dropout;
     private double dropoutRate;
 
+
+    public PositionalEncoding(String name) {
+        super(name);
+    }
+
     /**
      * 构造位置编码层
      *
@@ -68,8 +73,8 @@ public class PositionalEncoding extends Layer {
         }
     }
 
-    @Override
-    public Variable layerForward(Variable... inputs) {
+
+    private Variable layerForward0(Variable... inputs) {
         Variable input = inputs[0];
         NdArray inputData = input.getValue();
 
@@ -106,7 +111,7 @@ public class PositionalEncoding extends Layer {
 
     @Override
     public NdArray forward(NdArray... inputs) {
-        return layerForward(new Variable(inputs[0])).getValue();
+        return layerForward0(new Variable(inputs[0])).getValue();
     }
 
     @Override

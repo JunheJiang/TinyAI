@@ -4,6 +4,7 @@ import io.leavesfly.tinyai.func.Variable;
 import io.leavesfly.tinyai.ndarr.NdArray;
 import io.leavesfly.tinyai.ndarr.Shape;
 import io.leavesfly.tinyai.nnet.Layer;
+import io.leavesfly.tinyai.nnet.block.FeedForward;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,6 +32,11 @@ public class TransformerDecoderLayer extends Layer {
     private FeedForward feedForward;
     private LayerNorm layerNorm3;
     private double dropoutRate;
+
+
+    public TransformerDecoderLayer(String name) {
+        super(name);
+    }
 
     /**
      * 构造Transformer解码器层
@@ -118,22 +124,15 @@ public class TransformerDecoderLayer extends Layer {
         return input;
     }
 
+
     @Override
     public NdArray forward(NdArray... inputs) {
-        Variable[] variables = new Variable[inputs.length];
-        for (int i = 0; i < inputs.length; i++) {
-            variables[i] = new Variable(inputs[i]);
-        }
-        return layerForward(variables).getValue();
+        return null;
     }
 
     @Override
     public List<NdArray> backward(NdArray yGrad) {
-        // 解码器层的反向传播需要依次通过各个子层
-        List<NdArray> result = new ArrayList<>();
-        result.add(yGrad);
-        result.add(yGrad); // 对编码器输出的梯度
-        return result;
+        return null;
     }
 
     @Override

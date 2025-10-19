@@ -1,8 +1,9 @@
-package io.leavesfly.tinyai.nnet.layer.transformer;
+package io.leavesfly.tinyai.nnet.block;
 
 import io.leavesfly.tinyai.func.Variable;
 import io.leavesfly.tinyai.ndarr.NdArray;
 import io.leavesfly.tinyai.ndarr.Shape;
+import io.leavesfly.tinyai.nnet.Block;
 import io.leavesfly.tinyai.nnet.Layer;
 import io.leavesfly.tinyai.nnet.layer.activate.ReLuLayer;
 import io.leavesfly.tinyai.nnet.layer.dnn.LinearLayer;
@@ -20,7 +21,7 @@ import java.util.List;
  * <p>
  * FFN(x) = max(0, xW1 + b1)W2 + b2
  */
-public class FeedForward extends Layer {
+public class FeedForward extends Block {
 
     private LinearLayer firstLinear;
     private ReLuLayer activation;
@@ -93,19 +94,6 @@ public class FeedForward extends Layer {
         return new Variable(output3D);
     }
 
-    @Override
-    public NdArray forward(NdArray... inputs) {
-        return layerForward(new Variable(inputs[0])).getValue();
-    }
-
-    @Override
-    public List<NdArray> backward(NdArray yGrad) {
-        // 前馈网络的反向传播需要依次通过各层进行
-        // 这里提供简化版本
-        List<NdArray> result = new ArrayList<>();
-        result.add(yGrad);
-        return result;
-    }
 
     @Override
     public int requireInputNum() {

@@ -4,7 +4,7 @@ import io.leavesfly.tinyai.func.Variable;
 import io.leavesfly.tinyai.ndarr.NdArray;
 import io.leavesfly.tinyai.ndarr.Shape;
 import io.leavesfly.tinyai.nnet.Layer;
-import io.leavesfly.tinyai.nnet.layer.transformer.FeedForward;
+import io.leavesfly.tinyai.nnet.block.FeedForward;
 import io.leavesfly.tinyai.nnet.layer.transformer.LayerNorm;
 import io.leavesfly.tinyai.nnet.layer.transformer.MultiHeadAttention;
 

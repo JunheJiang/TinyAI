@@ -57,12 +57,16 @@ public class LstmLayer extends RnnLayer {
      * 隐藏层大小
      */
     private int hiddenSize;
-    
+
     /**
      * 当前状态的批大小
      * 用于检测批大小变化并重置状态
      */
     private int currentBatchSize = -1;
+
+    public LstmLayer(String name) {
+        super(name);
+    }
 
     /**
      * 构造一个LSTM层实例
@@ -192,7 +196,7 @@ public class LstmLayer extends RnnLayer {
     public Variable layerForward(Variable... inputs) {
         Variable x = inputs[0];
         int inputBatchSize = x.getValue().getShape().getRow();
-        
+
         // 检测批大小变化，如果变化则重置状态
         if (currentBatchSize != -1 && currentBatchSize != inputBatchSize) {
             // 批大小变化，重置状态以适应新的批大小

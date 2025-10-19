@@ -31,6 +31,11 @@ public class TransformerDecoder extends Decoder {
     private int maxSeqLength;
     private NdArray encoderOutput; // 存储编码器输出状态
 
+
+    public TransformerDecoder(String name) {
+        super(name);
+    }
+
     /**
      * 构造Transformer解码器
      *

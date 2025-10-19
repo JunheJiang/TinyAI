@@ -32,6 +32,10 @@ import io.leavesfly.tinyai.nnet.Block;
  */
 public abstract class Encoder extends Block {
 
+    public Encoder(String _name) {
+        super(_name);
+    }
+
     /**
      * 构造编码器实例
      *

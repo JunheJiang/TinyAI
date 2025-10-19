@@ -82,12 +82,17 @@ public class SimpleRnnLayer extends RnnLayer {
      * 隐藏层大小
      */
     private int hiddenSize;
-    
+
     /**
      * 当前状态的批大小
      * 用于检测批大小变化并重置状态
      */
     private int currentBatchSize = -1;
+
+
+    public SimpleRnnLayer(String name) {
+        super(name);
+    }
 
     /**
      * 构造一个SimpleRnnLayer实例
@@ -151,7 +156,7 @@ public class SimpleRnnLayer extends RnnLayer {
     public Variable layerForward(Variable... inputs) {
         Variable x = inputs[0];
         int inputBatchSize = x.getValue().getShape().getRow();
-        
+
         // 检测批大小变化，如果变化则重置状态
         if (currentBatchSize != -1 && currentBatchSize != inputBatchSize) {
             // 批大小变化，重置状态以适应新的批大小
@@ -174,7 +179,7 @@ public class SimpleRnnLayer extends RnnLayer {
                 resetState();
                 return layerForward(inputs); // 递归调用处理重置后的状态
             }
-            
+
             prevState = state;
             xLinear = x.linear(x2h, b);
             hLinear = new Variable(stateValue).linear(h2h, null);
@@ -185,70 +190,15 @@ public class SimpleRnnLayer extends RnnLayer {
         return state;
     }
 
-    /**
-     * 基于NdArray的前向传播方法
-     *
-     * @param inputs 输入数组，通常只包含一个输入数组
-     * @return 当前时间步的隐藏状态值
-     */
+
     @Override
     public NdArray forward(NdArray... inputs) {
-        NdArray x = inputs[0];
-
-        // 第一次前向传播，没有前一时间步的隐藏状态
-        if (stateValue == null) {
-            NdArray xLinear = x.dot(x2h.getValue());
-            Shape xLinearShape = xLinear.getShape();
-            NdArray bias = b.getValue().broadcastTo(xLinearShape);
-            NdArray linearResult = xLinear.add(bias);
-            stateValue = linearResult.tanh();
-        } else {
-            // 后续前向传播，包含前一时间步的隐藏状态
-            NdArray xLinear = x.dot(x2h.getValue());
-            Shape xLinearShape = xLinear.getShape();
-            NdArray bias = b.getValue().broadcastTo(xLinearShape);
-            NdArray xLinearWithBias = xLinear.add(bias);
-            NdArray hLinear = stateValue.dot(h2h.getValue());
-            NdArray linearResult = xLinearWithBias.add(hLinear);
-            stateValue = linearResult.tanh();
-        }
-        return stateValue;
+        return null;
     }
 
-    /**
-     * 反向传播方法
-     *
-     * @param yGrad 上游传来的梯度
-     * @return 输入和参数的梯度列表
-     */
     @Override
     public List<NdArray> backward(NdArray yGrad) {
-        // 计算tanh的梯度: grad * (1 - tanh^2(x))
-        NdArray tanhGrad = yGrad.mul(NdArray.ones(preTanh.getValue().getShape()).sub(preTanh.getValue().square()));
-
-        // 计算线性变换的梯度
-        NdArray xLinearGrad = tanhGrad;
-        NdArray hLinearGrad = tanhGrad;
-
-        // 计算输入x的梯度: grad * W_xh^T
-        NdArray xGrad = xLinearGrad.dot(x2h.getValue().transpose());
-
-        // 计算参数梯度
-        NdArray x2hGrad = inputs[0].getValue().transpose().dot(xLinearGrad);  // W_xh的梯度
-        NdArray bGrad = xLinearGrad.sumTo(b.getValue().getShape());           // b的梯度
-
-        // 如果有前一状态，计算h2h的梯度和前一状态的梯度
-        if (prevState != null) {
-            // 计算h2h的梯度: h_{t-1}^T * grad
-            NdArray h2hGrad = prevState.getValue().transpose().dot(hLinearGrad);
-            // 计算前一状态的梯度: grad * W_hh^T
-            NdArray hGrad = hLinearGrad.dot(h2h.getValue().transpose());
-            // 将输入梯度和前一状态梯度相加
-            xGrad = xGrad.add(hGrad);
-            return Arrays.asList(xGrad, x2hGrad, h2hGrad, bGrad);
-        } else {
-            return Arrays.asList(xGrad, x2hGrad, bGrad);
-        }
+        return null;
     }
 
     @Override

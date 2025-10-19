@@ -3,6 +3,7 @@ package io.leavesfly.tinyai.nnet.layer.transformer;
 import io.leavesfly.tinyai.func.Variable;
 import io.leavesfly.tinyai.ndarr.NdArray;
 import io.leavesfly.tinyai.ndarr.Shape;
+import io.leavesfly.tinyai.nnet.block.FeedForward;
 import io.leavesfly.tinyai.nnet.layer.activate.ReLuLayer;
 import io.leavesfly.tinyai.nnet.layer.dnn.LinearLayer;
 import org.junit.Before;
