@@ -5,6 +5,9 @@ import io.leavesfly.tinyai.func.base.*;
 import io.leavesfly.tinyai.func.loss.MeanSE;
 import io.leavesfly.tinyai.func.loss.SoftmaxCE;
 import io.leavesfly.tinyai.func.math.*;
+import io.leavesfly.tinyai.func.math.Mean;
+import io.leavesfly.tinyai.func.math.Variance;
+import io.leavesfly.tinyai.func.math.Sqrt;
 import io.leavesfly.tinyai.func.matrix.*;
 import io.leavesfly.tinyai.ndarr.NdArray;
 import io.leavesfly.tinyai.ndarr.Shape;
@@ -515,6 +518,46 @@ public class Variable implements Serializable {
      */
     public Variable min(int _axis, boolean _keepdims) {
         Function function = new Min(_axis, _keepdims);
+        return function.call(this);
+    }
+
+    /**
+     * 均值运算
+     * <p>
+     * 沿指定轴计算变量的均值
+     *
+     * @param _axis     轴索引
+     * @param _keepdims 是否保持维度
+     * @return 均值运算结果的新变量
+     */
+    public Variable mean(int _axis, boolean _keepdims) {
+        Function function = new Mean(_axis, _keepdims);
+        return function.call(this);
+    }
+
+    /**
+     * 方差运算
+     * <p>
+     * 沿指定轴计算变量的方差
+     *
+     * @param _axis     轴索引
+     * @param _keepdims 是否保持维度
+     * @return 方差运算结果的新变量
+     */
+    public Variable var(int _axis, boolean _keepdims) {
+        Function function = new Variance(_axis, _keepdims);
+        return function.call(this);
+    }
+
+    /**
+     * 平方根运算
+     * <p>
+     * 对变量执行平方根运算
+     *
+     * @return 平方根运算结果的新变量
+     */
+    public Variable sqrt() {
+        Function function = new Sqrt();
         return function.call(this);
     }
 
