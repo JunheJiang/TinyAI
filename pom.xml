@@ -38,6 +38,7 @@
         <module>tinyai-agent-embodied</module>
         <module>tinyai-agent-embodied-robot</module>
         <module>tinyai-agent-embodied-vla</module>
+        <module>tinyai-agent-embodied-wm</module>
     </modules>
 
     <properties>
