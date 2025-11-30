@@ -38,7 +38,7 @@
         <module>tinyai-agent/tinyai-agent-research</module>
 
         <!--        具身智能-->
-        <module>tinyai-embodied/tinyai-embodied</module>
+        <module>tinyai-embodied/tinyai-embodied-base</module>
         <module>tinyai-embodied/tinyai-embodied-robot</module>
         <module>tinyai-embodied/tinyai-embodied-vla</module>
         <module>tinyai-embodied/tinyai-embodied-wm</module>

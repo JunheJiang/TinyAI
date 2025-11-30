@@ -12,7 +12,7 @@
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
-    <artifactId>tinyai-embodied</artifactId>
+    <artifactId>tinyai-embodied-base</artifactId>
     <packaging>jar</packaging>
     <name>tinyai-agent-embodied</name>
     <description>TinyAI 具身智能模块 - 自动驾驶场景的端到端学习</description>
