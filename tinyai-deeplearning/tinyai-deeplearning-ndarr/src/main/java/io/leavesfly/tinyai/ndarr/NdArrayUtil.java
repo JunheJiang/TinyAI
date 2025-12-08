@@ -66,20 +66,6 @@ public class NdArrayUtil {
 
 
     /**
-     * 生成从0开始的连续整数序列
-     *
-     * @param size 序列长度
-     * @return 连续整数数组
-     */
-    public static int[] getSeq(int size) {
-        int[] seq = new int[size];
-        for (int i = 0; i < size; i++) {
-            seq[i] = i;
-        }
-        return seq;
-    }
-
-    /**
      * 复制单个数据元素（按索引）
      */
     private static void copyDataByIndex(NdArray source, NdArray target, int index) {
@@ -243,5 +229,20 @@ public class NdArrayUtil {
             res[i] = (int) src[i];
         }
         return res;
+    }
+
+
+    /**
+     * 生成从0开始的连续整数序列
+     *
+     * @param size 序列长度
+     * @return 连续整数数组
+     */
+    public static int[] getSeq(int size) {
+        int[] seq = new int[size];
+        for (int i = 0; i < size; i++) {
+            seq[i] = i;
+        }
+        return seq;
     }
 }

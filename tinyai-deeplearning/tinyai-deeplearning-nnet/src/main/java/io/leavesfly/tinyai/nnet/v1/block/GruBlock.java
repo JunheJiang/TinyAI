@@ -40,7 +40,7 @@ public class GruBlock extends Block {
     public GruBlock(String name, int inputSize, int hiddenSize, int outputSize) {
         super(name);
 
-        gruLayer = new GruLayer("gru");
+        gruLayer = new GruLayer("gru", inputSize, hiddenSize);
         addLayer(gruLayer);
 
         linearLayer = new LinearLayer("line", hiddenSize, outputSize, true);

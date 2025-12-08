@@ -48,12 +48,14 @@ public class CNNExample {
             // 卷积层1: 1 -> 6 channels, 5x5 kernel
             conv1 = new Conv2d("conv1", 1, 6, 5, 5, 1, 0, true);
             relu1 = new ReLU("relu1");
-            pool1 = new MaxPool2d("pool1", 2, 2, 2);
+            // 2x2 池化，步长2，无填充，保持注释中的 12x12 输出
+            pool1 = new MaxPool2d("pool1", 2, 2, 0);
 
             // 卷积层2: 6 -> 16 channels, 5x5 kernel
             conv2 = new Conv2d("conv2", 6, 16, 5, 5, 1, 0, true);
             relu2 = new ReLU("relu2");
-            pool2 = new MaxPool2d("pool2", 2, 2, 2);
+            // 2x2 池化，步长2，无填充，保持注释中的 4x4 输出
+            pool2 = new MaxPool2d("pool2", 2, 2, 0);
 
             // 全连接层1: 16*4*4 -> 120
             fc1 = new Linear("fc1", 16 * 4 * 4, 120, true);

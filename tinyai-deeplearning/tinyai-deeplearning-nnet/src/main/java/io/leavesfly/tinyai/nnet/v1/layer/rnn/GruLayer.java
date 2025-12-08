@@ -110,6 +110,11 @@ public class GruLayer extends Layer {
     private int hiddenSize;
 
     /**
+     * 输入特征维度
+     */
+    private int inputSize;
+
+    /**
      * 当前状态的批大小
      * 用于检测批大小变化并重置状态
      */
@@ -178,6 +183,20 @@ public class GruLayer extends Layer {
     }
 
     /**
+     * 构造一个GRU层实例（使用输入和隐藏维度）
+     *
+     * @param _name       层名称
+     * @param inputSize  输入特征维度
+     * @param hiddenSize 隐藏状态维度
+     */
+    public GruLayer(String _name, int inputSize, int hiddenSize) {
+        super(_name);
+        this.inputSize = inputSize;
+        this.hiddenSize = hiddenSize;
+        init();
+    }
+
+    /**
      * 构造一个GRU层实例
      *
      * @param _name         层名称
@@ -186,7 +205,8 @@ public class GruLayer extends Layer {
      */
     public GruLayer(String _name, Shape _xInputShape, Shape _yOutputShape) {
         super(_name, _xInputShape, _yOutputShape);
-        hiddenSize = _yOutputShape.getColumn();
+        this.inputSize = _xInputShape.getColumn();
+        this.hiddenSize = _yOutputShape.getColumn();
         init();
     }
 
@@ -206,7 +226,21 @@ public class GruLayer extends Layer {
      */
     @Override
     public void init() {
-        int inputSize = inputShape.getColumn();
+        // 如果 inputSize 未设置，尝试从 inputShape 获取
+        if (inputSize == 0 && inputShape != null) {
+            inputSize = inputShape.getColumn();
+        }
+        
+        // 如果 hiddenSize 未设置，尝试从 outputShape 获取
+        if (hiddenSize == 0 && outputShape != null) {
+            hiddenSize = outputShape.getColumn();
+        }
+        
+        // 如果仍然无法确定维度，抛出异常
+        if (inputSize == 0 || hiddenSize == 0) {
+            throw new IllegalStateException(
+                "GruLayer 初始化失败：inputSize 和 hiddenSize 必须通过构造函数参数或 inputShape/outputShape 提供");
+        }
 
         // 初始化更新门参数
         NdArray initWeight = NdArray.likeRandomN(Shape.of(inputSize, hiddenSize))
@@ -268,43 +302,63 @@ public class GruLayer extends Layer {
         if (stateValue == null) {
             // 第一次前向传播
             // 计算更新门
-            NdArray x_z = x.dot(w_z.getValue()).add(b_z.getValue().broadcastTo(x.getShape()));
+            NdArray x_z = x.dot(w_z.getValue()).add(b_z.getValue().broadcastTo(x.dot(w_z.getValue()).getShape()));
             NdArray zGateValue = x_z.sigmoid();
+            this.x_z = new Variable(x_z);
+            this.zGate = new Variable(zGateValue);
 
             // 计算重置门
-            NdArray x_r = x.dot(w_r.getValue()).add(b_r.getValue().broadcastTo(x.getShape()));
+            NdArray x_r = x.dot(w_r.getValue()).add(b_r.getValue().broadcastTo(x.dot(w_r.getValue()).getShape()));
             NdArray rGateValue = x_r.sigmoid();
+            this.x_r = new Variable(x_r);
+            this.rGate = new Variable(rGateValue);
 
             // 计算候选状态
-            NdArray x_h = x.dot(w_h.getValue()).add(b_h.getValue().broadcastTo(x.getShape()));
+            NdArray x_h = x.dot(w_h.getValue()).add(b_h.getValue().broadcastTo(x.dot(w_h.getValue()).getShape()));
             NdArray hCandidateValue = x_h.tanh();
+            this.x_h = new Variable(x_h);
+            this.hCandidate = new Variable(hCandidateValue);
 
             // 计算当前状态
             NdArray oneMinusZ = NdArray.ones(zGateValue.getShape()).sub(zGateValue);
+            this.oneMinusZ = new Variable(oneMinusZ);
             stateValue = oneMinusZ.mul(hCandidateValue);
+            this.state = new Variable(stateValue);
         } else {
             // 后续前向传播
             // 计算更新门
-            NdArray x_z = x.dot(w_z.getValue()).add(b_z.getValue().broadcastTo(x.getShape()));
+            NdArray x_z = x.dot(w_z.getValue()).add(b_z.getValue().broadcastTo(x.dot(w_z.getValue()).getShape()));
             NdArray h_z = stateValue.dot(u_z.getValue());
             NdArray zGateValue = x_z.add(h_z).sigmoid();
+            this.x_z = new Variable(x_z);
+            this.h_z = new Variable(h_z);
+            this.zGate = new Variable(zGateValue);
 
             // 计算重置门
-            NdArray x_r = x.dot(w_r.getValue()).add(b_r.getValue().broadcastTo(x.getShape()));
+            NdArray x_r = x.dot(w_r.getValue()).add(b_r.getValue().broadcastTo(x.dot(w_r.getValue()).getShape()));
             NdArray h_r = stateValue.dot(u_r.getValue());
             NdArray rGateValue = x_r.add(h_r).sigmoid();
+            this.x_r = new Variable(x_r);
+            this.h_r = new Variable(h_r);
+            this.rGate = new Variable(rGateValue);
 
             // 重置前一状态
             NdArray resetStateValue = rGateValue.mul(stateValue);
+            this.resetState = new Variable(resetStateValue);
 
             // 计算候选状态
-            NdArray x_h = x.dot(w_h.getValue()).add(b_h.getValue().broadcastTo(x.getShape()));
+            NdArray x_h = x.dot(w_h.getValue()).add(b_h.getValue().broadcastTo(x.dot(w_h.getValue()).getShape()));
             NdArray h_h = resetStateValue.dot(u_h.getValue());
             NdArray hCandidateValue = x_h.add(h_h).tanh();
+            this.x_h = new Variable(x_h);
+            this.h_h = new Variable(h_h);
+            this.hCandidate = new Variable(hCandidateValue);
 
             // 计算当前状态
             NdArray oneMinusZ = NdArray.ones(zGateValue.getShape()).sub(zGateValue);
+            this.oneMinusZ = new Variable(oneMinusZ);
             stateValue = zGateValue.mul(stateValue).add(oneMinusZ.mul(hCandidateValue));
+            this.state = new Variable(stateValue);
         }
 
         return stateValue;
@@ -405,11 +459,31 @@ public class GruLayer extends Layer {
         }
 
         // 返回梯度列表，顺序需要与参数顺序一致
-        if (dhPrev != null) {
-            return Arrays.asList(dx, dw_z, du_z, db_z, dw_r, du_r, db_r, dw_h, du_h, db_h);
+        // 累加参数梯度（手动管理参数，不通过输入返回）
+        accumulateGrad(w_z, dw_z);
+        accumulateGrad(u_z, du_z == null ? NdArray.zeros(u_z.getValue().getShape()) : du_z);
+        accumulateGrad(b_z, db_z);
+
+        accumulateGrad(w_r, dw_r);
+        accumulateGrad(u_r, du_r == null ? NdArray.zeros(u_r.getValue().getShape()) : du_r);
+        accumulateGrad(b_r, db_r);
+
+        accumulateGrad(w_h, dw_h);
+        accumulateGrad(u_h, du_h == null ? NdArray.zeros(u_h.getValue().getShape()) : du_h);
+        accumulateGrad(b_h, db_h);
+
+        // 仅返回与输入对应的梯度，保证数量与inputs一致
+        return Arrays.asList(dx);
+    }
+
+    /**
+     * 累加参数梯度，避免梯度被覆盖
+     */
+    private void accumulateGrad(ParameterV1 param, NdArray grad) {
+        if (param.getGrad() != null) {
+            param.setGrad(param.getGrad().add(grad));
         } else {
-            // 第一个时间步的情况
-            return Arrays.asList(dx, dw_z, db_z, dw_r, db_r, dw_h, db_h);
+            param.setGrad(grad);
         }
     }
 }

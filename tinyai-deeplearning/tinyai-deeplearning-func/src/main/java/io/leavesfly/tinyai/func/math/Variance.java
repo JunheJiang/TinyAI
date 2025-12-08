@@ -57,18 +57,25 @@ public class Variance extends Function {
         
         // 保存轴的大小，用于反向传播
         axisSize = shape[actualAxis];
-        
-        NdArray result = inputs[0].var(actualAxis);
-        
+
+        NdArray varReduced = inputs[0].var(actualAxis);
+        NdArray meanReduced = inputs[0].mean(actualAxis);
+
         if (keepdims) {
-            // 保存均值用于反向传播
-            mean = inputs[0].mean(actualAxis).broadcastTo(inputShape);
-            return result.broadcastTo(inputShape);
+            // 插入被约简轴的维度为1，再广播回原形状
+            int[] keepDims = shape.clone();
+            keepDims[actualAxis] = 1;
+
+            NdArray varKept = varReduced.reshape(Shape.of(keepDims));
+            NdArray meanKept = meanReduced.reshape(Shape.of(keepDims));
+
+            mean = meanKept.broadcastTo(inputShape); // 存储已广播均值用于反向
+            return varKept.broadcastTo(inputShape);
         } else {
-            // 保存均值用于反向传播
-            mean = inputs[0].mean(actualAxis);
+            // 保存未保持维度的均值用于反向
+            mean = meanReduced;
+            return varReduced;
         }
-        return result;
     }
 
     /**

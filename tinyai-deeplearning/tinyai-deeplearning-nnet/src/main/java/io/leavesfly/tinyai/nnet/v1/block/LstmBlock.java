@@ -43,7 +43,7 @@ public class LstmBlock extends Block {
 
         super(name);
         
-        lstmLayer = new SimpleRnnLayer("lstm");
+        lstmLayer = new SimpleRnnLayer("lstm", inputSize, hiddenSize);
         addLayer(lstmLayer);
 
         linearLayer = new LinearLayer("line", hiddenSize, outputSize, true);

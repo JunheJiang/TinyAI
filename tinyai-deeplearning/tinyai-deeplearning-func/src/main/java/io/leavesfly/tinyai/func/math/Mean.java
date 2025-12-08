@@ -54,10 +54,14 @@ public class Mean extends Function {
         
         // 保存轴的大小，用于反向传播
         axisSize = shape[actualAxis];
-        
+
         NdArray result = inputs[0].mean(actualAxis);
-        
+
         if (keepdims) {
+            // 插入被约简轴的维度为1，再广播回原形状
+            int[] keepDims = shape.clone();
+            keepDims[actualAxis] = 1;
+            result = result.reshape(Shape.of(keepDims));
             return result.broadcastTo(inputShape);
         }
         return result;
