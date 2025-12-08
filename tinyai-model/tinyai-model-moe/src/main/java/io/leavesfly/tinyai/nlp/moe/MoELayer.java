@@ -3,7 +3,7 @@ package io.leavesfly.tinyai.nlp.moe;
 import io.leavesfly.tinyai.func.Variable;
 import io.leavesfly.tinyai.ndarr.NdArray;
 import io.leavesfly.tinyai.ndarr.Shape;
-import io.leavesfly.tinyai.nnet.Layer;
+import io.leavesfly.tinyai.nnet.v1.Layer;
 
 import java.util.ArrayList;
 import java.util.List;

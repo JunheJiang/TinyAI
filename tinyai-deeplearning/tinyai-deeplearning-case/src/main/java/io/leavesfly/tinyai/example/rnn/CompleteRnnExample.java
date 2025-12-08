@@ -9,9 +9,9 @@ import io.leavesfly.tinyai.ml.loss.Loss;
 import io.leavesfly.tinyai.ml.loss.MeanSquaredLoss;
 import io.leavesfly.tinyai.ml.optimize.Adam;
 import io.leavesfly.tinyai.ndarr.NdArray;
-import io.leavesfly.tinyai.nnet.block.GruBlock;
-import io.leavesfly.tinyai.nnet.block.LstmBlock;
-import io.leavesfly.tinyai.nnet.block.SimpleRnnBlock;
+import io.leavesfly.tinyai.nnet.v1.block.GruBlock;
+import io.leavesfly.tinyai.nnet.v1.block.LstmBlock;
+import io.leavesfly.tinyai.nnet.v1.block.SimpleRnnBlock;
 
 import java.util.List;
 

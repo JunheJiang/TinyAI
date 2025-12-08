@@ -5,8 +5,8 @@ import io.leavesfly.tinyai.ndarr.Shape;
 import io.leavesfly.tinyai.nl.core.NestedOptimizationLevel;
 import io.leavesfly.tinyai.nl.core.ContextFlow;
 import io.leavesfly.tinyai.nl.core.FlowDirection;
-import io.leavesfly.tinyai.nnet.Block;
-import io.leavesfly.tinyai.nnet.LayerAble;
+import io.leavesfly.tinyai.nnet.v1.Block;
+import io.leavesfly.tinyai.nnet.v1.LayerAble;
 
 import java.util.ArrayList;
 import java.util.List;

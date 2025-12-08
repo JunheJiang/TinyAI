@@ -5,7 +5,7 @@ import io.leavesfly.tinyai.minimind.model.MiniMindModel;
 import io.leavesfly.tinyai.minimind.training.rlaif.RLAIFDataset;
 import io.leavesfly.tinyai.ml.optimize.Adam;
 import io.leavesfly.tinyai.ndarr.NdArray;
-import io.leavesfly.tinyai.nnet.ParameterV1;
+import io.leavesfly.tinyai.nnet.v1.ParameterV1;
 
 import java.util.ArrayList;
 import java.util.List;

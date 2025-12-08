@@ -6,9 +6,9 @@ import io.leavesfly.tinyai.gpt2.GPT2TokenEmbedding;
 import io.leavesfly.tinyai.ndarr.Shape;
 import io.leavesfly.tinyai.nlp.moe.MoELayer;
 import io.leavesfly.tinyai.nlp.moe.MoETransformerBlock;
-import io.leavesfly.tinyai.nnet.Block;
+import io.leavesfly.tinyai.nnet.v1.Block;
 
-import io.leavesfly.tinyai.nnet.layer.norm.LayerNorm;
+import io.leavesfly.tinyai.nnet.v1.layer.norm.LayerNorm;
 
 import java.util.ArrayList;
 import java.util.List;

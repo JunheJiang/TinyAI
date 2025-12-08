@@ -10,7 +10,7 @@ import io.leavesfly.tinyai.ml.loss.MeanSquaredLoss;
 import io.leavesfly.tinyai.ml.optimize.Optimizer;
 import io.leavesfly.tinyai.ml.optimize.SGD;
 import io.leavesfly.tinyai.ndarr.NdArray;
-import io.leavesfly.tinyai.nnet.block.SimpleRnnBlock;
+import io.leavesfly.tinyai.nnet.v1.block.SimpleRnnBlock;
 
 import java.util.List;
 

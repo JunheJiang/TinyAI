@@ -4,7 +4,7 @@ import io.leavesfly.tinyai.ml.Model;
 import io.leavesfly.tinyai.ml.dataset.Batch;
 import io.leavesfly.tinyai.ml.loss.Loss;
 import io.leavesfly.tinyai.func.Variable;
-import io.leavesfly.tinyai.nnet.ParameterV1;
+import io.leavesfly.tinyai.nnet.v1.ParameterV1;
 
 import java.util.Map;
 import java.util.concurrent.Callable;

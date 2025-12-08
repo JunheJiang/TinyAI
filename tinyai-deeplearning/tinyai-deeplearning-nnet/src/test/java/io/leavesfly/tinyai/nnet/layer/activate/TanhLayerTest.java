@@ -3,6 +3,7 @@ package io.leavesfly.tinyai.nnet.layer.activate;
 import io.leavesfly.tinyai.func.Variable;
 import io.leavesfly.tinyai.ndarr.NdArray;
 import io.leavesfly.tinyai.ndarr.Shape;
+import io.leavesfly.tinyai.nnet.v1.layer.activate.TanhLayer;
 import org.junit.Before;
 import org.junit.Test;
 

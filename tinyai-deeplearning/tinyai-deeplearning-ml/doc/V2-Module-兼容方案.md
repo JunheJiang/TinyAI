@@ -159,15 +159,14 @@ Model model = new Model("myModel", v2Model);
 ### 使用 V1 Block（向后兼容）
 
 ```java
-import io.leavesfly.tinyai.nnet.Block;
-import io.leavesfly.tinyai.nnet.block.SequentialBlock;
+
 
 // 创建 V1 Block
-Block v1Block = new SequentialBlock("model");
+Block v1Block=new SequentialBlock("model");
 // ... 添加层
 
 // 直接使用 V1 Block（自动适配）
-Model model = new Model("myModel", v1Block);
+        Model model=new Model("myModel",v1Block);
 // 内部自动创建 BlockModuleAdapter
 ```
 

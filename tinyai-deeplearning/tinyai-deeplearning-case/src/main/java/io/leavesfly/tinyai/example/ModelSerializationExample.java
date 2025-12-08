@@ -6,8 +6,8 @@ import io.leavesfly.tinyai.ml.ModelInfo;
 import io.leavesfly.tinyai.ml.ModelInfoExporter;
 import io.leavesfly.tinyai.ml.ParameterManager;
 import io.leavesfly.tinyai.ndarr.NdArray;
-import io.leavesfly.tinyai.nnet.ParameterV1;
-import io.leavesfly.tinyai.nnet.block.MlpBlock;
+import io.leavesfly.tinyai.nnet.v1.ParameterV1;
+import io.leavesfly.tinyai.nnet.v1.block.MlpBlock;
 import io.leavesfly.tinyai.util.Config;
 
 import java.io.File;

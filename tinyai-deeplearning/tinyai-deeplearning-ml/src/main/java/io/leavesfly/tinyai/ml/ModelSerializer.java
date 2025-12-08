@@ -3,7 +3,7 @@ package io.leavesfly.tinyai.ml;
 import io.leavesfly.tinyai.ml.exception.ModelSerializationException;
 import io.leavesfly.tinyai.ml.parameter.ParameterOperator;
 import io.leavesfly.tinyai.ml.util.ValidationUtils;
-import io.leavesfly.tinyai.nnet.ParameterV1;
+import io.leavesfly.tinyai.nnet.v1.ParameterV1;
 
 import java.io.*;
 import java.util.HashMap;

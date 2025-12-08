@@ -1,7 +1,7 @@
 package io.leavesfly.tinyai.ml;
 
 import io.leavesfly.tinyai.ndarr.Shape;
-import io.leavesfly.tinyai.nnet.ParameterV1;
+import io.leavesfly.tinyai.nnet.v1.ParameterV1;
 
 import java.io.FileWriter;
 import java.io.IOException;

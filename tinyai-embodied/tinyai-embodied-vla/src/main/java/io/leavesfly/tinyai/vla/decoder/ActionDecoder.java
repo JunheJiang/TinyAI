@@ -4,8 +4,8 @@ import io.leavesfly.tinyai.vla.model.ActionType;
 import io.leavesfly.tinyai.vla.model.VLAAction;
 import io.leavesfly.tinyai.ndarr.NdArray;
 import io.leavesfly.tinyai.func.Variable;
-import io.leavesfly.tinyai.nnet.Block;
-import io.leavesfly.tinyai.nnet.layer.dnn.LinearLayer;
+import io.leavesfly.tinyai.nnet.v1.Block;
+import io.leavesfly.tinyai.nnet.v1.layer.dnn.LinearLayer;
 
 /**
  * 动作解码器

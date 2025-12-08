@@ -242,38 +242,34 @@ NdArray result = predictor.predict(inputData);
 ### 完整训练流程示例
 
 ```java
-import io.leavesfly.tinyai.ml.*;
-import io.leavesfly.tinyai.ml.dataset.ArrayDataset;
-import io.leavesfly.tinyai.ml.loss.SoftmaxCrossEntropy;
-import io.leavesfly.tinyai.ml.optimize.Adam;
-import io.leavesfly.tinyai.nnet.block.MlpBlock;
+
 
 // 1. 准备数据
-NdArray xData = ...; // 输入数据
-NdArray yData = ...; // 标签数据
-DataSet dataSet = new ArrayDataset(xData, yData);
+NdArray xData=...; // 输入数据
+        NdArray yData=...; // 标签数据
+        DataSet dataSet=new ArrayDataset(xData,yData);
 
 // 2. 创建模型
-MlpBlock mlpBlock = new MlpBlock("classifier", 
-                                 inputShape, 
-                                 new int[]{128, 64, 10});
-Model model = new Model("mnist_classifier", mlpBlock);
+        MlpBlock mlpBlock=new MlpBlock("classifier",
+        inputShape,
+        new int[]{128,64,10});
+        Model model=new Model("mnist_classifier",mlpBlock);
 
 // 3. 配置训练组件
-Loss loss = new SoftmaxCrossEntropy();
-Optimizer optimizer = new Adam(0.001f);
-Monitor monitor = new Monitor();
-Evaluator evaluator = new ClassificationEvaluator();
+        Loss loss=new SoftmaxCrossEntropy();
+        Optimizer optimizer=new Adam(0.001f);
+        Monitor monitor=new Monitor();
+        Evaluator evaluator=new ClassificationEvaluator();
 
 // 4. 创建训练器（启用并行训练）
-Trainer trainer = new Trainer(100, monitor, evaluator, true, 4);
-trainer.init(dataSet, model, loss, optimizer);
+        Trainer trainer=new Trainer(100,monitor,evaluator,true,4);
+        trainer.init(dataSet,model,loss,optimizer);
 
 // 5. 开始训练
-trainer.train(true);
+        trainer.train(true);
 
 // 6. 保存模型
-model.saveModel("trained_model.bin");
+        model.saveModel("trained_model.bin");
 ```
 
 ### 模型加载和推理

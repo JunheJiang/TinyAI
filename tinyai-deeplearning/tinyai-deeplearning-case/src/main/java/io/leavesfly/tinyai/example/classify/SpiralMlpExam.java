@@ -18,8 +18,8 @@ import io.leavesfly.tinyai.ml.optimize.Optimizer;
 import io.leavesfly.tinyai.ml.optimize.SGD;
 import io.leavesfly.tinyai.ndarr.NdArray;
 import io.leavesfly.tinyai.ndarr.Shape;
-import io.leavesfly.tinyai.nnet.Block;
-import io.leavesfly.tinyai.nnet.block.MlpBlock;
+import io.leavesfly.tinyai.nnet.v1.Block;
+import io.leavesfly.tinyai.nnet.v1.block.MlpBlock;
 
 
 import java.util.List;

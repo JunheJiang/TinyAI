@@ -41,14 +41,14 @@ graph TB
 ### 🧠 多样化神经网络层
 
 #### 激活层 (activate)
-- [`ReLuLayer`](src/main/java/io/leavesfly/tinyai/nnet/layer/activate/ReLuLayer.java) - ReLU 激活函数
-- [`SigmoidLayer`](src/main/java/io/leavesfly/tinyai/nnet/layer/activate/SigmoidLayer.java) - Sigmoid 激活函数
-- [`TanhLayer`](src/main/java/io/leavesfly/tinyai/nnet/layer/activate/TanhLayer.java) - Tanh 激活函数
-- [`SoftMaxLayer`](src/main/java/io/leavesfly/tinyai/nnet/layer/activate/SoftMaxLayer.java) - SoftMax 归一化层
+- [`ReLuLayer`](src/main/java/io/leavesfly/tinyai/nnet/v1/layer/activate/ReLuLayer.java) - ReLU 激活函数
+- [`SigmoidLayer`](src/main/java/io/leavesfly/tinyai/nnet/v1/layer/activate/SigmoidLayer.java) - Sigmoid 激活函数
+- [`TanhLayer`](src/main/java/io/leavesfly/tinyai/nnet/v1/layer/activate/TanhLayer.java) - Tanh 激活函数
+- [`SoftMaxLayer`](src/main/java/io/leavesfly/tinyai/nnet/v1/layer/activate/SoftMaxLayer.java) - SoftMax 归一化层
 
 #### 全连接层 (dnn)
-- [`AffineLayer`](src/main/java/io/leavesfly/tinyai/nnet/layer/dnn/AffineLayer.java) - 仿射变换层 (y = xW + b)
-- [`LinearLayer`](src/main/java/io/leavesfly/tinyai/nnet/layer/dnn/LinearLayer.java) - 线性变换层
+- [`AffineLayer`](src/main/java/io/leavesfly/tinyai/nnet/v1/layer/dnn/AffineLayer.java) - 仿射变换层 (y = xW + b)
+- [`LinearLayer`](src/main/java/io/leavesfly/tinyai/nnet/v1/layer/dnn/LinearLayer.java) - 线性变换层
 
 #### 卷积层 (cnn)
 - 卷积层实现
@@ -56,17 +56,17 @@ graph TB
 - 深度分离卷积层
 
 #### 循环神经网络层 (rnn)
-- [`SimpleRnnLayer`](src/main/java/io/leavesfly/tinyai/nnet/layer/rnn/SimpleRnnLayer.java) - 简单 RNN 层
-- [`LstmLayer`](src/main/java/io/leavesfly/tinyai/nnet/layer/rnn/LstmLayer.java) - LSTM 长短期记忆网络
-- [`GruLayer`](src/main/java/io/leavesfly/tinyai/nnet/layer/rnn/GruLayer.java) - GRU 门控循环单元
+- [`SimpleRnnLayer`](src/main/java/io/leavesfly/tinyai/nnet/v1/layer/rnn/SimpleRnnLayer.java) - 简单 RNN 层
+- [`LstmLayer`](src/main/java/io/leavesfly/tinyai/nnet/v1/layer/rnn/LstmLayer.java) - LSTM 长短期记忆网络
+- [`GruLayer`](src/main/java/io/leavesfly/tinyai/nnet/v1/layer/rnn/GruLayer.java) - GRU 门控循环单元
 
 #### Transformer 层 (transformer)
-- [`MultiHeadAttention`](src/main/java/io/leavesfly/tinyai/nnet/layer/transf/MultiHeadAttention.java) - 多头注意力机制
-- [`LayerNorm`](src/main/java/io/leavesfly/tinyai/nnet/layer/transf/LayerNorm.java) - 层归一化
-- [`PositionalEncoding`](src/main/java/io/leavesfly/tinyai/nnet/layer/transf/PositionalEncoding.java) - 位置编码
-- [`FeedForward`](src/main/java/io/leavesfly/tinyai/nnet/layer/transf/FeedForward.java) - 前馈网络
-- [`TransformerEncoderLayer`](src/main/java/io/leavesfly/tinyai/nnet/layer/transf/TransformerEncoderLayer.java) - Transformer 编码器层
-- [`TransformerDecoderLayer`](src/main/java/io/leavesfly/tinyai/nnet/layer/transf/TransformerDecoderLayer.java) - Transformer 解码器层
+- [`MultiHeadAttention`](src/main/java/io/leavesfly/tinyai/nnet/v1/layer/transf/MultiHeadAttention.java) - 多头注意力机制
+- [`LayerNorm`](src/main/java/io/leavesfly/tinyai/nnet/v1/layer/transf/LayerNorm.java) - 层归一化
+- [`PositionalEncoding`](src/main/java/io/leavesfly/tinyai/nnet/v1/layer/transf/PositionalEncoding.java) - 位置编码
+- [`FeedForward`](src/main/java/io/leavesfly/tinyai/nnet/v1/layer/transf/FeedForward.java) - 前馈网络
+- [`TransformerEncoderLayer`](src/main/java/io/leavesfly/tinyai/nnet/v1/layer/transf/TransformerEncoderLayer.java) - Transformer 编码器层
+- [`TransformerDecoderLayer`](src/main/java/io/leavesfly/tinyai/nnet/v1/layer/transf/TransformerDecoderLayer.java) - Transformer 解码器层
 
 #### 嵌入层 (embedd)
 - 词嵌入层实现
@@ -79,12 +79,12 @@ graph TB
 ### 🔧 预构建网络块
 
 #### 基础块 (block)
-- [`SequentialBlock`](src/main/java/io/leavesfly/tinyai/nnet/block/SequentialBlock.java) - 序列组合块
-- [`MlpBlock`](src/main/java/io/leavesfly/tinyai/nnet/block/MlpBlock.java) - 多层感知机块
-- [`LstmBlock`](src/main/java/io/leavesfly/tinyai/nnet/block/LstmBlock.java) - LSTM 网络块
-- [`GruBlock`](src/main/java/io/leavesfly/tinyai/nnet/block/GruBlock.java) - GRU 网络块
-- [`SimpleRnnBlock`](src/main/java/io/leavesfly/tinyai/nnet/block/SimpleRnnBlock.java) - 简单 RNN 块
-- [`SimpleConvNet`](src/main/java/io/leavesfly/tinyai/nnet/block/SimpleConvNet.java) - 简单卷积神经网络
+- [`SequentialBlock`](src/main/java/io/leavesfly/tinyai/nnet/v1/block/SequentialBlock.java) - 序列组合块
+- [`MlpBlock`](src/main/java/io/leavesfly/tinyai/nnet/v1/block/MlpBlock.java) - 多层感知机块
+- [`LstmBlock`](src/main/java/io/leavesfly/tinyai/nnet/v1/block/LstmBlock.java) - LSTM 网络块
+- [`GruBlock`](src/main/java/io/leavesfly/tinyai/nnet/v1/block/GruBlock.java) - GRU 网络块
+- [`SimpleRnnBlock`](src/main/java/io/leavesfly/tinyai/nnet/v1/block/SimpleRnnBlock.java) - 简单 RNN 块
+- [`SimpleConvNet`](src/main/java/io/leavesfly/tinyai/nnet/v1/block/SimpleConvNet.java) - 简单卷积神经网络
 
 #### 高级块
 - **seq2seq/** - 序列到序列模型实现
@@ -106,35 +106,33 @@ graph TB
 ### 创建简单的多层感知机
 
 ```java
-import io.leavesfly.tinyai.nnet.block.MlpBlock;
-import io.leavesfly.tinyai.nnet.layer.activate.ReLuLayer;
+
 import io.leavesfly.tinyai.nnet.layer.dnn.AffineLayer;
-import io.leavesfly.tinyai.ndarr.Shape;
 
 // 创建 MLP 网络
-Shape inputShape = new Shape(784); // 输入维度
-MlpBlock mlp = new MlpBlock("mnist_mlp", inputShape, 
-                           new int[]{128, 64, 10}); // 隐藏层和输出层维度
+Shape inputShape=new Shape(784); // 输入维度
+        MlpBlock mlp=new MlpBlock("mnist_mlp",inputShape,
+        new int[]{128,64,10}); // 隐藏层和输出层维度
 
 // 前向传播
-Variable output = mlp.layerForward(inputVariable);
+        Variable output=mlp.layerForward(inputVariable);
 ```
 
 ### 构建自定义网络
 
 ```java
-import io.leavesfly.tinyai.nnet.block.SequentialBlock;
+
 
 // 创建序列块
-SequentialBlock model = new SequentialBlock("custom_model", inputShape);
+SequentialBlock model=new SequentialBlock("custom_model",inputShape);
 
 // 添加层
-model.addLayer(new AffineLayer("hidden1", inputShape, hiddenShape));
-model.addLayer(new ReLuLayer("relu1", hiddenShape));
-model.addLayer(new AffineLayer("output", hiddenShape, outputShape));
+        model.addLayer(new AffineLayer("hidden1",inputShape,hiddenShape));
+        model.addLayer(new ReLuLayer("relu1",hiddenShape));
+        model.addLayer(new AffineLayer("output",hiddenShape,outputShape));
 
 // 初始化网络
-model.init();
+        model.init();
 ```
 
 ### 使用 Transformer 组件

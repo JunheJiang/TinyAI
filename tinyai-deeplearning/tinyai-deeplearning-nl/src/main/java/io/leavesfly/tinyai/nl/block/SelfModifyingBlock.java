@@ -2,8 +2,8 @@ package io.leavesfly.tinyai.nl.block;
 
 import io.leavesfly.tinyai.func.Variable;
 import io.leavesfly.tinyai.ndarr.Shape;
-import io.leavesfly.tinyai.nnet.Block;
-import io.leavesfly.tinyai.nnet.LayerAble;
+import io.leavesfly.tinyai.nnet.v1.Block;
+import io.leavesfly.tinyai.nnet.v1.LayerAble;
 
 /**
  * 自修改块（SelfModifyingBlock）

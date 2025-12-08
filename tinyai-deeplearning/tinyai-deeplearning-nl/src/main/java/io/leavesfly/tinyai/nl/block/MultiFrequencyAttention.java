@@ -3,7 +3,7 @@ package io.leavesfly.tinyai.nl.block;
 import io.leavesfly.tinyai.func.Variable;
 import io.leavesfly.tinyai.ndarr.Shape;
 import io.leavesfly.tinyai.nl.core.AssociativeMemory;
-import io.leavesfly.tinyai.nnet.Block;
+import io.leavesfly.tinyai.nnet.v1.Block;
 
 /**
  * 多频率注意力块（MultiFrequencyAttention）

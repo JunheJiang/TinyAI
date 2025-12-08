@@ -2,9 +2,9 @@ package io.leavesfly.tinyai.vla.fusion;
 
 import io.leavesfly.tinyai.ndarr.NdArray;
 import io.leavesfly.tinyai.func.Variable;
-import io.leavesfly.tinyai.nnet.Block;
-import io.leavesfly.tinyai.nnet.layer.dnn.LinearLayer;
-import io.leavesfly.tinyai.nnet.layer.norm.LayerNorm;
+import io.leavesfly.tinyai.nnet.v1.Block;
+import io.leavesfly.tinyai.nnet.v1.layer.dnn.LinearLayer;
+import io.leavesfly.tinyai.nnet.v1.layer.norm.LayerNorm;
 
 import java.util.ArrayList;
 import java.util.List;

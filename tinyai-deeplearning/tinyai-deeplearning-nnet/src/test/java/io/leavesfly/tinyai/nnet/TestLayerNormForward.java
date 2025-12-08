@@ -3,7 +3,7 @@ package io.leavesfly.tinyai.nnet;
 import io.leavesfly.tinyai.func.Variable;
 import io.leavesfly.tinyai.ndarr.NdArray;
 import io.leavesfly.tinyai.ndarr.Shape;
-import io.leavesfly.tinyai.nnet.layer.norm.LayerNorm;
+import io.leavesfly.tinyai.nnet.v1.layer.norm.LayerNorm;
 
 public class TestLayerNormForward {
     public static void main(String[] args) {

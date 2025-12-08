@@ -7,7 +7,7 @@ import io.leavesfly.tinyai.ml.optimize.Optimizer;
 import io.leavesfly.tinyai.rl.Agent;
 import io.leavesfly.tinyai.rl.Experience;
 import io.leavesfly.tinyai.ndarr.NdArray;
-import io.leavesfly.tinyai.nnet.block.MlpBlock;
+import io.leavesfly.tinyai.nnet.v1.block.MlpBlock;
 
 import java.util.ArrayList;
 import java.util.List;

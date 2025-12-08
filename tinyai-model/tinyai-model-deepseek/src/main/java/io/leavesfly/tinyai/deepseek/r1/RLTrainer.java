@@ -10,7 +10,7 @@ import io.leavesfly.tinyai.ml.loss.Loss;
 import io.leavesfly.tinyai.ml.optimize.Optimizer;
 import io.leavesfly.tinyai.ndarr.NdArray;
 import io.leavesfly.tinyai.ndarr.Shape;
-import io.leavesfly.tinyai.nnet.ParameterV1;
+import io.leavesfly.tinyai.nnet.v1.ParameterV1;
 
 import java.util.ArrayList;
 import java.util.HashMap;

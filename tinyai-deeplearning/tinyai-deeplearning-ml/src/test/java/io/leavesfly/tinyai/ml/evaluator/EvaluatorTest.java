@@ -8,7 +8,7 @@ import io.leavesfly.tinyai.ml.loss.Classify;
 import io.leavesfly.tinyai.ml.loss.Loss;
 import io.leavesfly.tinyai.ndarr.NdArray;
 import io.leavesfly.tinyai.ndarr.Shape;
-import io.leavesfly.tinyai.nnet.Block;
+import io.leavesfly.tinyai.nnet.v1.Block;
 import org.junit.Before;
 import org.junit.Test;
 

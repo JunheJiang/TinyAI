@@ -5,8 +5,8 @@ import io.leavesfly.tinyai.ml.inference.Predictor;
 import io.leavesfly.tinyai.ml.inference.Translator;
 import io.leavesfly.tinyai.ndarr.NdArray;
 import io.leavesfly.tinyai.ndarr.Shape;
-import io.leavesfly.tinyai.nnet.Block;
-import io.leavesfly.tinyai.nnet.ParameterV1; // V1 ParameterV1 (for backward compatibility)
+import io.leavesfly.tinyai.nnet.v1.Block;
+import io.leavesfly.tinyai.nnet.v1.ParameterV1; // V1 ParameterV1 (for backward compatibility)
 import io.leavesfly.tinyai.nnet.V2ParameterProxy; // V2 Parameter 的代理类
 import io.leavesfly.tinyai.nnet.v2.adapter.BlockModuleAdapter;
 import io.leavesfly.tinyai.nnet.v2.core.Module;

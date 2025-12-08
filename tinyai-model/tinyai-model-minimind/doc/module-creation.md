@@ -1287,10 +1287,9 @@ import io.leavesfly.tinyai.nnet.v2.init.Xavier;
 
 ```java
 // ❌ 禁止使用
-import io.leavesfly.tinyai.nnet.Block;           // 使用 V2 Module 代替
-import io.leavesfly.tinyai.nnet.Layer;           // 使用 V2 Module 代替
+
 import io.leavesfly.tinyai.nnet.layer.dnn.AffineLayer;  // 使用 V2 Linear 代替
-import io.leavesfly.tinyai.nnet.block.SequentialBlock;  // 使用 V2 Sequential 代替
+
 ```
 
 **自行实现的组件**:
@@ -1639,9 +1638,9 @@ NdArray weight = new NdArray(shape);
 #### 陷阱1: Dropout 路径错误
 
 **错误示例**:
+
 ```java
 // ❌ 错误: 使用了 V1 路径
-import io.leavesfly.tinyai.nnet.layer.norm.Dropout;
 ```
 
 **正确做法**:

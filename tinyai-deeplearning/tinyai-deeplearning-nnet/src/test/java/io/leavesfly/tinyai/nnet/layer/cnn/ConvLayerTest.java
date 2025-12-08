@@ -3,7 +3,8 @@ package io.leavesfly.tinyai.nnet.layer.cnn;
 import io.leavesfly.tinyai.func.Variable;
 import io.leavesfly.tinyai.ndarr.NdArray;
 import io.leavesfly.tinyai.ndarr.Shape;
-import io.leavesfly.tinyai.nnet.ParameterV1;
+import io.leavesfly.tinyai.nnet.v1.ParameterV1;
+import io.leavesfly.tinyai.nnet.v1.layer.cnn.ConvLayer;
 import org.junit.Before;
 import org.junit.Test;
 

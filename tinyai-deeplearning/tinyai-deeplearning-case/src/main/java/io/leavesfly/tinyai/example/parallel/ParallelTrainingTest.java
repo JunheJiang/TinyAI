@@ -6,7 +6,7 @@ import io.leavesfly.tinyai.ml.evaluator.AccuracyEval;
 import io.leavesfly.tinyai.ml.loss.Classify;
 import io.leavesfly.tinyai.ml.loss.SoftmaxCrossEntropy;
 import io.leavesfly.tinyai.ml.optimize.Adam;
-import io.leavesfly.tinyai.nnet.block.MlpBlock;
+import io.leavesfly.tinyai.nnet.v1.block.MlpBlock;
 import io.leavesfly.tinyai.util.Config;
 
 /**

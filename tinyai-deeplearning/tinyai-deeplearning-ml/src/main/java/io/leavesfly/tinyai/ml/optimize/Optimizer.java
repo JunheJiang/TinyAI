@@ -1,7 +1,7 @@
 package io.leavesfly.tinyai.ml.optimize;
 
 import io.leavesfly.tinyai.ml.Model;
-import io.leavesfly.tinyai.nnet.ParameterV1;
+import io.leavesfly.tinyai.nnet.v1.ParameterV1;
 
 import java.util.Map;
 

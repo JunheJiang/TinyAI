@@ -10,16 +10,8 @@
 
 ```java
 // V1导入
-import io.leavesfly.tinyai.nnet.Layer;
-import io.leavesfly.tinyai.nnet.Block;
-import io.leavesfly.tinyai.nnet.layer.dnn.LinearLayer;
-import io.leavesfly.tinyai.nnet.block.SequentialBlock;
 
 // V2导入
-import io.leavesfly.tinyai.nnet.v2.core.Module;
-import io.leavesfly.tinyai.nnet.v2.layer.dnn.Linear;
-import io.leavesfly.tinyai.nnet.v2.container.Sequential;
-import io.leavesfly.tinyai.nnet.v2.init.Initializers;
 ```
 
 ### 基本用法对比
@@ -70,8 +62,8 @@ Variable output = model.forward(input);
 // 查找替换规则
 io.leavesfly.tinyai.nnet.Layer → io.leavesfly.tinyai.nnet.v2.core.Module
 io.leavesfly.tinyai.nnet.Block → io.leavesfly.tinyai.nnet.v2.core.Module
-io.leavesfly.tinyai.nnet.layer.dnn.LinearLayer → io.leavesfly.tinyai.nnet.v2.layer.dnn.Linear
-io.leavesfly.tinyai.nnet.block.SequentialBlock → io.leavesfly.tinyai.nnet.v2.container.Sequential
+io.leavesfly.tinyai.nnet.v1.dnn.layer.LinearLayer → io.leavesfly.tinyai.nnet.v2.layer.dnn.Linear
+io.leavesfly.tinyai.nnet.v1.block.SequentialBlock → io.leavesfly.tinyai.nnet.v2.container.Sequential
 ```
 
 ### 步骤2：修改类继承
@@ -325,18 +317,18 @@ V1和V2完全隔离，可以在同一项目中共存：
 
 ```java
 // 旧模块继续使用V1
-import io.leavesfly.tinyai.nnet.layer.dnn.LinearLayer;
-Block oldModule = new SequentialBlock("old");
-oldModule.addLayer(new LinearLayer("fc", 128, 64, true));
+
+Block oldModule=new SequentialBlock("old");
+        oldModule.addLayer(new LinearLayer("fc",128,64,true));
 
 // 新模块使用V2
-import io.leavesfly.tinyai.nnet.v2.layer.dnn.Linear;
-Module newModule = new Sequential("new")
-    .add(new Linear("fc", 64, 10));
+
+Module newModule=new Sequential("new")
+        .add(new Linear("fc",64,10));
 
 // 在前向传播中组合
-Variable h = oldModule.layerForward(input);
-Variable output = newModule.forward(h);
+        Variable h=oldModule.layerForward(input);
+        Variable output=newModule.forward(h);
 ```
 
 ### 策略B：逐步替换

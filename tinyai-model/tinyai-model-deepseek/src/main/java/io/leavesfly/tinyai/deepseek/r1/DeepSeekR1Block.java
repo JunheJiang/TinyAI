@@ -4,10 +4,10 @@ import io.leavesfly.tinyai.func.Variable;
 import io.leavesfly.tinyai.gpt2.GPT2TokenEmbedding;
 import io.leavesfly.tinyai.ndarr.NdArray;
 import io.leavesfly.tinyai.ndarr.Shape;
-import io.leavesfly.tinyai.nnet.Block;
-import io.leavesfly.tinyai.nnet.ParameterV1;
-import io.leavesfly.tinyai.nnet.layer.dnn.LinearLayer;
-import io.leavesfly.tinyai.nnet.layer.transf.PositionalEncoding;
+import io.leavesfly.tinyai.nnet.v1.Block;
+import io.leavesfly.tinyai.nnet.v1.ParameterV1;
+import io.leavesfly.tinyai.nnet.v1.layer.dnn.LinearLayer;
+import io.leavesfly.tinyai.nnet.v1.layer.transf.PositionalEncoding;
 
 import java.util.ArrayList;
 import java.util.HashMap;

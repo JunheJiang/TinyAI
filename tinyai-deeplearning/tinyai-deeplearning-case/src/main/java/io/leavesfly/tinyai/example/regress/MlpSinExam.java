@@ -10,8 +10,8 @@ import io.leavesfly.tinyai.ml.loss.Loss;
 import io.leavesfly.tinyai.ml.loss.MeanSquaredLoss;
 import io.leavesfly.tinyai.ml.optimize.Optimizer;
 import io.leavesfly.tinyai.ml.optimize.SGD;
-import io.leavesfly.tinyai.nnet.Block;
-import io.leavesfly.tinyai.nnet.block.MlpBlock;
+import io.leavesfly.tinyai.nnet.v1.Block;
+import io.leavesfly.tinyai.nnet.v1.block.MlpBlock;
 import io.leavesfly.tinyai.util.Config;
 
 import java.util.List;

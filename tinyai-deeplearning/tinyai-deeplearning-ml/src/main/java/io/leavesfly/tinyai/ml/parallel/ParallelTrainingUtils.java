@@ -4,7 +4,7 @@ import io.leavesfly.tinyai.ml.Model;
 import io.leavesfly.tinyai.ml.exception.TrainingException;
 import io.leavesfly.tinyai.ml.parameter.ParameterOperator;
 import io.leavesfly.tinyai.ndarr.NdArray;
-import io.leavesfly.tinyai.nnet.ParameterV1;
+import io.leavesfly.tinyai.nnet.v1.ParameterV1;
 import io.leavesfly.tinyai.nnet.v2.core.Module;
 
 import java.io.ByteArrayInputStream;

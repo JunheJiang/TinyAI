@@ -286,21 +286,18 @@ model.apply(module -> {
 - V2: `io.leavesfly.tinyai.nnet.v2.*`
 
 **代码共存：**
+
 ```java
 // V1代码继续正常工作
-import io.leavesfly.tinyai.nnet.Block;
-import io.leavesfly.tinyai.nnet.layer.dnn.LinearLayer;
 
-Block v1Model = new SequentialBlock("model");
-v1Model.addLayer(new LinearLayer("fc", 128, 64, true));
+Block v1Model=new SequentialBlock("model");
+        v1Model.addLayer(new LinearLayer("fc",128,64,true));
 
 // V2代码使用新特性
-import io.leavesfly.tinyai.nnet.v2.core.Module;
-import io.leavesfly.tinyai.nnet.v2.layer.dnn.Linear;
-import io.leavesfly.tinyai.nnet.v2.container.Sequential;
 
-Module v2Model = new Sequential("model")
-    .add(new Linear("fc", 128, 64));
+
+Module v2Model=new Sequential("model")
+        .add(new Linear("fc",128,64));
 ```
 
 ### 共享基础设施

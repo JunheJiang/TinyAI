@@ -3,7 +3,7 @@ package io.leavesfly.tinyai.qwen3.block;
 import io.leavesfly.tinyai.func.Variable;
 import io.leavesfly.tinyai.ndarr.NdArray;
 import io.leavesfly.tinyai.ndarr.Shape;
-import io.leavesfly.tinyai.nnet.Block;
+import io.leavesfly.tinyai.nnet.v1.Block;
 import io.leavesfly.tinyai.qwen3.Qwen3Config;
 import io.leavesfly.tinyai.qwen3.layer.RMSNormLayer;
 

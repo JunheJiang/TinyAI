@@ -3,6 +3,7 @@ package io.leavesfly.tinyai.nnet.block.seq2seq;
 import io.leavesfly.tinyai.func.Variable;
 import io.leavesfly.tinyai.ndarr.NdArray;
 import io.leavesfly.tinyai.ndarr.Shape;
+import io.leavesfly.tinyai.nnet.v1.block.seq2seq.Encoder;
 import org.junit.Before;
 import org.junit.Test;
 

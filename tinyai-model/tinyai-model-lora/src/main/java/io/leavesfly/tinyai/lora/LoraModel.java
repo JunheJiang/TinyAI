@@ -1,9 +1,9 @@
 package io.leavesfly.tinyai.lora;
 
 import io.leavesfly.tinyai.ndarr.NdArray;
-import io.leavesfly.tinyai.nnet.Block;
-import io.leavesfly.tinyai.nnet.ParameterV1;
-import io.leavesfly.tinyai.nnet.layer.activate.ReLuLayer;
+import io.leavesfly.tinyai.nnet.v1.Block;
+import io.leavesfly.tinyai.nnet.v1.ParameterV1;
+import io.leavesfly.tinyai.nnet.v1.layer.activate.ReLuLayer;
 
 import java.util.ArrayList;
 import java.util.HashMap;

@@ -176,7 +176,7 @@ String generatedCode = cursor.generateCode("method validateEmail");
 
 // 4. 使用深度学习模型
 import io.leavesfly.tinyai.ml.*;
-import io.leavesfly.tinyai.nnet.block.MlpBlock;
+import io.leavesfly.tinyai.nnet.v1.block.MlpBlock;
 
 MlpBlock mlpBlock = new MlpBlock("classifier", 784, new int[]{128, 64, 10});
 Model model = new Model("mnist_classifier", mlpBlock);

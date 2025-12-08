@@ -156,8 +156,8 @@ System.out.println("x的梯度: " + xGrad);
 
 ```java
 import io.leavesfly.tinyai.nnet.block.*;
-import io.leavesfly.tinyai.nnet.layer.dnn.LinearLayer;
-import io.leavesfly.tinyai.nnet.layer.activate.ReLuLayer;
+import io.leavesfly.tinyai.nnet.v1.dnn.layer.LinearLayer;
+import io.leavesfly.tinyai.nnet.v1.activate.layer.ReLuLayer;
 
 // 构建MLP
 MlpBlock mlp = new MlpBlock("classifier", 784, new int[]{128, 64, 10});

@@ -1,10 +1,10 @@
 package io.leavesfly.tinyai.gpt3;
 
 import io.leavesfly.tinyai.func.Variable;
-import io.leavesfly.tinyai.nnet.Block;
-import io.leavesfly.tinyai.nnet.layer.norm.LayerNorm;
-import io.leavesfly.tinyai.nnet.layer.transf.MultiHeadAttention;
-import io.leavesfly.tinyai.nnet.block.FeedForward;
+import io.leavesfly.tinyai.nnet.v1.Block;
+import io.leavesfly.tinyai.nnet.v1.layer.norm.LayerNorm;
+import io.leavesfly.tinyai.nnet.v1.layer.transf.MultiHeadAttention;
+import io.leavesfly.tinyai.nnet.v1.block.FeedForward;
 
 /**
  * GPT-3 Transformer块实现

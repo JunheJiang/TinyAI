@@ -3,8 +3,8 @@ package io.leavesfly.tinyai.gpt1;
 import io.leavesfly.tinyai.func.Variable;
 import io.leavesfly.tinyai.ndarr.NdArray;
 import io.leavesfly.tinyai.ndarr.Shape;
-import io.leavesfly.tinyai.nnet.Layer;
-import io.leavesfly.tinyai.nnet.ParameterV1;
+import io.leavesfly.tinyai.nnet.v1.Layer;
+import io.leavesfly.tinyai.nnet.v1.ParameterV1;
 
 import java.util.ArrayList;
 import java.util.List;

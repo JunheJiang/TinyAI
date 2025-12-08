@@ -315,10 +315,9 @@ import io.leavesfly.tinyai.nnet.v2.layer.norm.Dropout;
 
 ```java
 // ❌ 禁止使用
-import io.leavesfly.tinyai.nnet.Block;
-import io.leavesfly.tinyai.nnet.Layer;
+
 import io.leavesfly.tinyai.nnet.layer.dnn.AffineLayer;
-import io.leavesfly.tinyai.nnet.block.SequentialBlock;
+
 ```
 
 ### 自行实现的组件

@@ -1,6 +1,7 @@
 package io.leavesfly.tinyai.nnet;
 
 import io.leavesfly.tinyai.ndarr.NdArray;
+import io.leavesfly.tinyai.nnet.v1.ParameterV1;
 import io.leavesfly.tinyai.nnet.v2.core.Parameter;
 
 /**

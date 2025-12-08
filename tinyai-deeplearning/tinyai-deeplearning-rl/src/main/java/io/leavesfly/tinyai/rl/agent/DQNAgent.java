@@ -12,7 +12,7 @@ import io.leavesfly.tinyai.rl.ReplayBuffer;
 import io.leavesfly.tinyai.rl.policy.EpsilonGreedyPolicy;
 import io.leavesfly.tinyai.ndarr.NdArray;
 import io.leavesfly.tinyai.ndarr.Shape;
-import io.leavesfly.tinyai.nnet.block.MlpBlock;
+import io.leavesfly.tinyai.nnet.v1.block.MlpBlock;
 import io.leavesfly.tinyai.util.Config;
 
 /**

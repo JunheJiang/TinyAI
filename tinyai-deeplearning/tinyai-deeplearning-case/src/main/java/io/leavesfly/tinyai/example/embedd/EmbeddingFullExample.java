@@ -2,9 +2,9 @@ package io.leavesfly.tinyai.example.embedd;
 
 import io.leavesfly.tinyai.func.Variable;
 import io.leavesfly.tinyai.ndarr.NdArray;
-import io.leavesfly.tinyai.nnet.layer.activate.ReLuLayer;
-import io.leavesfly.tinyai.nnet.layer.dnn.LinearLayer;
-import io.leavesfly.tinyai.nnet.layer.embedd.Embedding;
+import io.leavesfly.tinyai.nnet.v1.layer.activate.ReLuLayer;
+import io.leavesfly.tinyai.nnet.v1.layer.dnn.LinearLayer;
+import io.leavesfly.tinyai.nnet.v1.layer.embedd.Embedding;
 
 /**
  * Embedding层完整示例

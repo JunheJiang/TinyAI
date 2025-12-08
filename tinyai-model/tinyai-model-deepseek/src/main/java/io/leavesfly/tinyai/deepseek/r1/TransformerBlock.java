@@ -3,10 +3,10 @@ package io.leavesfly.tinyai.deepseek.r1;
 import io.leavesfly.tinyai.func.Variable;
 import io.leavesfly.tinyai.ndarr.NdArray;
 import io.leavesfly.tinyai.ndarr.Shape;
-import io.leavesfly.tinyai.nnet.Block;
-import io.leavesfly.tinyai.nnet.block.FeedForward;
-import io.leavesfly.tinyai.nnet.layer.norm.LayerNorm;
-import io.leavesfly.tinyai.nnet.layer.transf.MultiHeadAttention;
+import io.leavesfly.tinyai.nnet.v1.Block;
+import io.leavesfly.tinyai.nnet.v1.block.FeedForward;
+import io.leavesfly.tinyai.nnet.v1.layer.norm.LayerNorm;
+import io.leavesfly.tinyai.nnet.v1.layer.transf.MultiHeadAttention;
 
 /**
  * Transformer块实现 - DeepSeek R1的基础Transformer组件

@@ -3,7 +3,7 @@ package io.leavesfly.tinyai.lora;
 import io.leavesfly.tinyai.func.Variable;
 import io.leavesfly.tinyai.ndarr.NdArray;
 import io.leavesfly.tinyai.ndarr.Shape;
-import io.leavesfly.tinyai.nnet.ParameterV1;
+import io.leavesfly.tinyai.nnet.v1.ParameterV1;
 
 /**
  * LoRA适配器类 - 实现低秩矩阵分解的核心组件
