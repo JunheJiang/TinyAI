@@ -35,7 +35,6 @@
         <module>tinyai-agent/tinyai-agent-pattern</module>
         <module>tinyai-agent/tinyai-agent-evol</module>
         <module>tinyai-agent/tinyai-agent-manus</module>
-        <module>tinyai-agent/tinyai-agent-cursor</module>
         <module>tinyai-agent/tinyai-agent-research</module>
 
         <!--        具身智能-->
