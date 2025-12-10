@@ -25,7 +25,6 @@
         <module>tinyai-model/tinyai-model-lora</module>
         <module>tinyai-model/tinyai-model-gpt</module>
         <module>tinyai-model/tinyai-model-qwen</module>
-        <module>tinyai-model/tinyai-model-moe</module>
         <module>tinyai-model/tinyai-model-minimind</module>
 
         <!--        智能体-->

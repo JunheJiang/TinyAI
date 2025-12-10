@@ -12,7 +12,8 @@ import io.leavesfly.tinyai.nnet.v2.init.Initializers;
  * <p>
  * 二维卷积层，用于处理图像等二维数据。
  * <p>
- * 实现标准的卷积操作，使用Im2Col技术将卷积转换为矩阵乘法。
+ * 本实现委托给底层优化的 {@link io.leavesfly.tinyai.func.matrix.Conv2d} Function，
+ * 该Function使用Im2Col技术将卷积转换为高效的矩阵乘法。
  * <p>
  * 公式：
  * output = Conv2d(input, weight) + bias
@@ -28,7 +29,7 @@ import io.leavesfly.tinyai.nnet.v2.init.Initializers;
  * out_width = (width + 2*padding - kernel_width) / stride + 1
  *
  * @author leavesfly
- * @version 2.0
+ * @version 2.0 (优化版 - 委托给func层)
  */
 public class Conv2d extends Module {
 
@@ -127,118 +128,55 @@ public class Conv2d extends Module {
     @Override
     public Variable forward(Variable... inputs) {
         Variable x = inputs[0];
-        // 使用Variable的形状属性
+        
+        // 验证输入维度
         int dim = x.ndim();
         if (dim != 4) {
             throw new IllegalArgumentException(
                     String.format("Expected 4D input (batch, channels, height, width), but got %dD", dim));
         }
 
-        int batchSize = x.size(0);
         int inputChannels = x.size(1);
-        int inputHeight = x.size(2);
-        int inputWidth = x.size(3);
-
         if (inputChannels != inChannels) {
             throw new IllegalArgumentException(
                     String.format("Expected %d input channels, but got %d", inChannels, inputChannels));
         }
 
-        // 计算输出尺寸
-        int outputHeight = (inputHeight + 2 * padding - kernelHeight) / stride + 1;
-        int outputWidth = (inputWidth + 2 * padding - kernelWidth) / stride + 1;
-
-        // 执行Im2Col转换（需要复杂的NdArray操作）
-        NdArray inputData = x.getValue();
-        NdArray im2colResult = performIm2Col(inputData, batchSize, inputChannels, 
-                                             inputHeight, inputWidth, outputHeight, outputWidth);
-
-        // 重塑权重为二维矩阵
-        NdArray weightReshaped = reshapeWeight();
-
-        // 矩阵乘法计算卷积 - 使用Variable层级操作
-        Variable im2colVar = new Variable(im2colResult);
-        im2colVar.setRequireGrad(false);  // 中间结果不需要梯度
-        Variable weightVar = new Variable(weightReshaped.transpose());
-        weightVar.setRequireGrad(false);  // 这个临时变量不需要梯度
-        Variable output = im2colVar.matMul(weightVar);
+        // 创建底层卷积Function（使用Im2Col优化实现）
+        io.leavesfly.tinyai.func.matrix.Conv2d convFunc = 
+            new io.leavesfly.tinyai.func.matrix.Conv2d(stride, padding);
+        
+        // 执行卷积运算（自动构建计算图）
+        Variable output = convFunc.call(x, weight);
 
         // 添加偏置
         if (useBias) {
             output = addBias(output);
         }
 
-        // 重塑输出为4维
-        Shape outputShape = Shape.of(batchSize, outChannels, outputHeight, outputWidth);
-        output = output.reshape(outputShape);
-
         return output;
     }
 
-    /**
-     * 执行Im2Col转换
-     * <p>
-     * 将卷积窗口展开为列，方便进行矩阵乘法
-     */
-    private NdArray performIm2Col(NdArray inputData, int batchSize, int channels,
-                                   int height, int width, int outHeight, int outWidth) {
-        int outputRows = batchSize * outHeight * outWidth;
-        int outputCols = channels * kernelHeight * kernelWidth;
 
-        float[] outputData = new float[outputRows * outputCols];
-
-        int outputRowIndex = 0;
-        for (int n = 0; n < batchSize; n++) {
-            for (int h = 0; h < outHeight; h++) {
-                for (int w = 0; w < outWidth; w++) {
-                    int colIndex = 0;
-
-                    for (int c = 0; c < channels; c++) {
-                        for (int fh = 0; fh < kernelHeight; fh++) {
-                            int imRow = h * stride + fh - padding;
-                            for (int fw = 0; fw < kernelWidth; fw++) {
-                                int imCol = w * stride + fw - padding;
-
-                                if (imRow >= 0 && imRow < height && imCol >= 0 && imCol < width) {
-                                    outputData[outputRowIndex * outputCols + colIndex] =
-                                            inputData.get(n, c, imRow, imCol);
-                                } else {
-                                    // 填充0
-                                    outputData[outputRowIndex * outputCols + colIndex] = 0.0f;
-                                }
-                                colIndex++;
-                            }
-                        }
-                    }
-                    outputRowIndex++;
-                }
-            }
-        }
-
-        Shape outputShape = Shape.of(outputRows, outputCols);
-        return NdArray.of(outputData, outputShape);
-    }
-
-    /**
-     * 重塑权重为二维矩阵
-     * <p>
-     * 从 (out_channels, in_channels, kernel_h, kernel_w)
-     * 到 (out_channels, in_channels * kernel_h * kernel_w)
-     */
-    private NdArray reshapeWeight() {
-        NdArray weightData = weight.data();
-        Shape newShape = Shape.of(outChannels, inChannels * kernelHeight * kernelWidth);
-        return weightData.reshape(newShape);
-    }
 
     /**
      * 添加偏置
      * <p>
-     * 使用Variable层级的加法操作
+     * 广播偏置到所有空间维度 [B, OC, OH, OW]
+     * bias形状: [OC] -> 广播到 [B, OC, OH, OW]
      */
     private Variable addBias(Variable output) {
-        // bias是Parameter，直接作为Variable参与运算
-        return output.add(bias);
+        // 获取输出形状
+        int batchSize = output.size(0);
+        int outChannels = output.size(1);
+        int outHeight = output.size(2);
+        int outWidth = output.size(3);
+        
+        // 重塑bias为 [1, OC, 1, 1] 以便广播
+        Variable biasReshaped = bias.reshape(Shape.of(1, outChannels, 1, 1));
+        
+        // 广播并相加
+        return output.add(biasReshaped);
     }
 
     public int getInChannels() {

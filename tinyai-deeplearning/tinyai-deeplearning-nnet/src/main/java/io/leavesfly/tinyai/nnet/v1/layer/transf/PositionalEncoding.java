@@ -75,8 +75,59 @@ public class PositionalEncoding extends Layer {
 
     @Override
     public Variable layerForward(Variable... inputs) {
-        //todo
-        return null;
+        if (inputs == null || inputs.length == 0) {
+            throw new IllegalArgumentException("PositionalEncoding layer requires input");
+        }
+        
+        Variable input = inputs[0];
+        NdArray inputData = input.getValue();
+        Shape inputShape = inputData.getShape();
+        
+        // 输入形状: (batch_size, seq_len, d_model)
+        if (inputShape.getDimNum() != 3) {
+            throw new IllegalArgumentException(
+                String.format("PositionalEncoding expects 3D input (batch, seq, d_model), got %dD", 
+                    inputShape.getDimNum())
+            );
+        }
+        
+        int batchSize = inputShape.getDimension(0);
+        int seqLen = inputShape.getDimension(1);
+        int dModel = inputShape.getDimension(2);
+        
+        // 验证序列长度
+        if (seqLen > maxSeqLength) {
+            throw new IllegalArgumentException(
+                String.format("Sequence length %d exceeds maximum %d", seqLen, maxSeqLength)
+            );
+        }
+        
+        // ============================================================================
+        // 使用Variable算子构造位置编码，避免NdArray直接操作
+        // ============================================================================
+        
+        // 将预计算的位置编码转为Variable
+        Variable posEncVar = new Variable(posEncoding);
+        posEncVar.setRequireGrad(false);  // 位置编码不需要梯度
+        
+        // 截取对应长度: [从0到seqLen)
+        // 使用slice操作截取前seqLen行
+        int[] rowSlices = new int[seqLen];
+        for (int i = 0; i < seqLen; i++) {
+            rowSlices[i] = i;
+        }
+        Variable posEncSlice = posEncVar.getItem(rowSlices, null);  // (seq_len, d_model)
+        
+        // 广播到batch维度: (seq_len, d_model) -> (1, seq_len, d_model) -> (batch, seq_len, d_model)
+        posEncSlice = posEncSlice.reshape(Shape.of(1, seqLen, dModel));
+        posEncSlice = posEncSlice.broadcastTo(Shape.of(batchSize, seqLen, dModel));
+        
+        // 将位置编码加到输入
+        Variable output = input.add(posEncSlice);
+        
+        // TODO: 当Variable支持dropout时，添加: if (dropout) { output = output.dropout(dropoutRate); }
+        
+        return output;
     }
 
 }

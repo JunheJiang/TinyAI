@@ -1577,4 +1577,39 @@ public class Variable implements Serializable {
     public static Variable randn(Shape shape) {
         return new Variable(NdArray.randn(shape));
     }
+
+    // =============================================================================
+    // 卷积操作
+    // =============================================================================
+    // 提供2D卷积操作，支持深度学习中的卷积神经网络
+    // =============================================================================
+
+    /**
+     * 2D卷积操作
+     * <p>
+     * 对当前变量（输入）与卷积核执行2D卷积运算
+     * <p>
+     * 输入形状: [batch_size, in_channels, height, width]
+     * 卷积核形状: [out_channels, in_channels, kernel_h, kernel_w]
+     * 输出形状: [batch_size, out_channels, out_h, out_w]
+     *
+     * @param kernel  卷积核变量
+     * @param stride  步长
+     * @param padding 填充大小
+     * @return 卷积运算结果的新变量
+     */
+    public Variable conv2d(Variable kernel, int stride, int padding) {
+        Function function = new io.leavesfly.tinyai.func.matrix.Conv2d(stride, padding);
+        return function.call(this, kernel);
+    }
+
+    /**
+     * 2D卷积操作（默认stride=1, padding=0）
+     *
+     * @param kernel 卷积核变量
+     * @return 卷积运算结果的新变量
+     */
+    public Variable conv2d(Variable kernel) {
+        return conv2d(kernel, 1, 0);
+    }
 }

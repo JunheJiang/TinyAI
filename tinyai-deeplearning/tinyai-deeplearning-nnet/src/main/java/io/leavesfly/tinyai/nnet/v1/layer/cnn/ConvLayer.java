@@ -17,6 +17,15 @@ import java.util.List;
  * <p>
  * 卷积公式：output = input * weight + bias
  * 其中 weight形状为 (out_channels, in_channels, kernel_height, kernel_width)
+ * <p>
+ * 输入形状: [batch_size, in_channels, height, width]
+ * 输出形状: [batch_size, out_channels, out_height, out_width]
+ * 其中:
+ * - out_height = (height + 2 * padding - kernel_height) / stride + 1
+ * - out_width = (width + 2 * padding - kernel_width) / stride + 1
+ *
+ * @author TinyAI Team
+ * @version 1.0
  */
 public class ConvLayer extends Layer {
 
@@ -31,14 +40,6 @@ public class ConvLayer extends Layer {
     private int padding;             // 填充
     private boolean useBias;        // 是否使用偏置
 
-    /**
-     * 前向传播中缓存的中间结果，供反向传播使用
-     */
-    private NdArray lastInput;       // 输入缓存
-    private NdArray lastIm2col;      // im2col 展开结果
-    private int lastOutHeight;
-    private int lastOutWidth;
-    private int lastBatchSize;
 
     public ConvLayer(String name) {
         super(name);
@@ -125,8 +126,97 @@ public class ConvLayer extends Layer {
 
     @Override
     public Variable layerForward(Variable... inputs) {
-        //todo
-        return null;
+        if (inputs == null || inputs.length == 0) {
+            throw new IllegalArgumentException("ConvLayer requires input");
+        }
+        
+        Variable input = inputs[0];
+        NdArray inputData = input.getValue();
+        Shape inputShape = inputData.getShape();
+        
+        // 输入形状: (batch_size, channels, height, width)
+        if (inputShape.getDimNum() != 4) {
+            throw new IllegalArgumentException(
+                String.format("ConvLayer expects 4D input (batch, channels, height, width), got %dD", 
+                    inputShape.getDimNum())
+            );
+        }
+        
+        int batchSize = inputShape.getDimension(0);
+        int inChannelsActual = inputShape.getDimension(1);
+        int inputHeight = inputShape.getDimension(2);
+        int inputWidth = inputShape.getDimension(3);
+        
+        // 验证输入通道数
+        if (inChannelsActual != inChannels) {
+            throw new IllegalArgumentException(
+                String.format("Input channels mismatch: expected %d, got %d", inChannels, inChannelsActual)
+            );
+        }
+        
+        // ============================================================================
+        // 使用Variable.conv2d()算子，保持计算图完整
+        // ============================================================================
+        
+        // 将ParameterV1转为Variable
+        Variable kernelVar = new Variable(weight.getValue());
+        kernelVar.setRequireGrad(true);
+        
+        // 执行卷积操作
+        Variable output = input.conv2d(kernelVar, stride, padding);
+        
+        // 添加偏置（如果使用）
+        if (useBias) {
+            Variable biasVar = new Variable(bias.getValue());
+            biasVar.setRequireGrad(true);
+            
+            // 将偏置reshape为 [1, out_channels, 1, 1] 以便广播
+            biasVar = biasVar.reshape(Shape.of(1, outChannels, 1, 1));
+            
+            output = output.add(biasVar);
+        }
+        
+        return output;
+    }
+
+    // =============================================================================
+    // Getter方法
+    // =============================================================================
+
+    public int getInChannels() {
+        return inChannels;
+    }
+
+    public int getOutChannels() {
+        return outChannels;
+    }
+
+    public int getKernelHeight() {
+        return kernelHeight;
+    }
+
+    public int getKernelWidth() {
+        return kernelWidth;
+    }
+
+    public int getStride() {
+        return stride;
+    }
+
+    public int getPadding() {
+        return padding;
+    }
+
+    public boolean isUseBias() {
+        return useBias;
+    }
+
+    public ParameterV1 getWeight() {
+        return weight;
+    }
+
+    public ParameterV1 getBias() {
+        return bias;
     }
 
 }

@@ -1,6 +1,7 @@
 package io.leavesfly.tinyai.nnet.v1.layer.embedd;
 
 import io.leavesfly.tinyai.func.Variable;
+import io.leavesfly.tinyai.func.matrix.Gather;
 import io.leavesfly.tinyai.ndarr.NdArray;
 import io.leavesfly.tinyai.ndarr.NdArrayUtil;
 import io.leavesfly.tinyai.ndarr.Shape;
@@ -71,8 +72,26 @@ public class Embedding extends Layer {
 
     @Override
     public Variable layerForward(Variable... inputs) {
-        //todo
-        return null;
+        if (inputs == null || inputs.length == 0) {
+            throw new IllegalArgumentException("Embedding layer requires input");
+        }
+        
+        Variable tokenIds = inputs[0];
+        
+        // ============================================================================
+        // 使用 Gather Function 进行 Embedding Lookup，保持计算图完整
+        // Gather(weight, indices) -> output
+        // ============================================================================
+        
+        // 将ParameterV1转为Variable
+        Variable weightVar = new Variable(wIn.getValue());
+        weightVar.setRequireGrad(true);
+        
+        // 使用Gather Function进行Embedding查找
+        Gather gatherFunc = new Gather();
+        Variable output = gatherFunc.call(weightVar, tokenIds);
+        
+        return output;
     }
 
     /**

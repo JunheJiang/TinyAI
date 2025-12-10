@@ -1,0 +1,315 @@
+package io.leavesfly.tinyai.gpt3;
+
+import io.leavesfly.tinyai.func.Variable;
+import io.leavesfly.tinyai.ml.Model;
+import io.leavesfly.tinyai.ndarr.NdArray;
+import io.leavesfly.tinyai.ndarr.Shape;
+
+/**
+ * GPT-3模型类
+ * 
+ * GPT-3是OpenAI于2020年发布的大规模语言模型,引入了多项创新:
+ * 1. 并行注意力计算 - 提升计算效率
+ * 2. 超大规模 - 最大175B参数
+ * 3. Few-shot学习能力 - 无需微调即可执行新任务
+ * 4. 上下文学习 - 从示例中快速理解任务模式
+ * 
+ * 本实现基于TinyAI框架,提供多规模配置:
+ * - 小型: 125M参数 (学习测试)
+ * - 中型: 350M参数 (实用应用)
+ * - 大型: 1.3B参数 (高质量生成)
+ * - 超大型: 175B参数 (顶级性能)
+ * 
+ * @author leavesfly
+ * @version 1.0
+ */
+public class GPT3Model extends Model {
+    
+    private final GPT3Config config;
+    private final GPT3MainBlock gpt3Block;
+    
+    /**
+     * 构造GPT-3模型
+     * 
+     * @param name 模型名称
+     * @param config GPT-3配置
+     */
+    public GPT3Model(String name, GPT3Config config) {
+        super(name, new GPT3MainBlock(name + "_main", config));
+        this.config = config;
+        this.gpt3Block = (GPT3MainBlock) getModule();
+        
+        // 设置模型描述
+        setDescription(buildDescription());
+    }
+    
+    /**
+     * 构建模型描述
+     */
+    private String buildDescription() {
+        return String.format(
+            "GPT-3语言模型 | 参数量: %s | 层数: %d | 维度: %d | 注意力头: %d | " +
+            "架构: %s | 特性: %s",
+            formatParamCount(config.estimateParameterCount()),
+            config.getNLayer(),
+            config.getNEmbd(),
+            config.getNHead(),
+            config.isParallelAttention() ? "并行计算" : "串行（GPT-2风格）",
+            buildFeatureList()
+        );
+    }
+    
+    /**
+     * 构建特性列表字符串
+     */
+    private String buildFeatureList() {
+        StringBuilder features = new StringBuilder();
+        if (config.isParallelAttention()) {
+            features.append("并行Attn+MLP");
+        }
+        if (config.isUseRotaryEmbedding()) {
+            if (features.length() > 0) features.append(", ");
+            features.append("RoPE");
+        }
+        if (config.isSparseAttention()) {
+            if (features.length() > 0) features.append(", ");
+            features.append("稀疏注意力");
+        }
+        if (config.isGradientCheckpointing()) {
+            if (features.length() > 0) features.append(", ");
+            features.append("梯度检查点");
+        }
+        if (features.length() == 0) {
+            features.append("标准");
+        }
+        return features.toString();
+    }
+    
+    /**
+     * 格式化参数数量
+     */
+    private String formatParamCount(long count) {
+        if (count >= 1_000_000_000) {
+            return String.format("%.2fB", count / 1_000_000_000.0);
+        } else if (count >= 1_000_000) {
+            return String.format("%.2fM", count / 1_000_000.0);
+        } else {
+            return String.format("%,d", count);
+        }
+    }
+    
+    // ==================== 工厂方法 ====================
+    
+    /**
+     * 创建小型GPT-3模型（125M参数）
+     * 配置: 768维, 12层, 12头
+     * 适用: 学习测试、快速实验
+     * 
+     * @param name 模型名称
+     * @return GPT-3模型实例
+     */
+    public static GPT3Model createSmallModel(String name) {
+        GPT3Config config = GPT3Config.createSmallConfig();
+        return new GPT3Model(name, config);
+    }
+    
+    /**
+     * 创建中型GPT-3模型（350M参数）
+     * 配置: 1024维, 24层, 16头
+     * 适用: 实用应用、生产环境
+     * 
+     * @param name 模型名称
+     * @return GPT-3模型实例
+     */
+    public static GPT3Model createMediumModel(String name) {
+        GPT3Config config = GPT3Config.createMediumConfig();
+        return new GPT3Model(name, config);
+    }
+    
+    /**
+     * 创建大型GPT-3模型（1.3B参数）
+     * 配置: 2048维, 24层, 32头
+     * 适用: 高质量生成、复杂任务
+     * 特性: 启用RoPE、稀疏注意力、梯度检查点
+     * 
+     * @param name 模型名称
+     * @return GPT-3模型实例
+     */
+    public static GPT3Model createLargeModel(String name) {
+        GPT3Config config = GPT3Config.createLargeConfig();
+        return new GPT3Model(name, config);
+    }
+    
+    /**
+     * 创建超大型GPT-3模型（175B参数）
+     * 配置: 12288维, 96层, 96头
+     * 适用: 顶级性能、研究实验
+     * 特性: 全部优化特性启用
+     * 
+     * @param name 模型名称
+     * @return GPT-3模型实例
+     */
+    public static GPT3Model createXLModel(String name) {
+        GPT3Config config = GPT3Config.createXLConfig();
+        return new GPT3Model(name, config);
+    }
+    
+    // ==================== 推理方法 ====================
+    
+    /**
+     * 预测下一个token的概率分布
+     * 
+     * @param tokenIds 输入token序列 (batch_size, seq_len)
+     * @return logits (batch_size, seq_len, vocab_size)
+     */
+    public Variable predict(Variable tokenIds) {
+        return forward(tokenIds);
+    }
+    
+    /**
+     * 生成文本序列（简化实现）
+     * 
+     * @param promptIds 提示序列
+     * @param maxNewTokens 最大生成token数
+     * @return 生成的序列
+     */
+    public NdArray generateSequence(NdArray promptIds, int maxNewTokens) {
+        // 简化实现：贪婪解码
+        // 实际应用中可以使用Top-k、Top-p、beam search等高级采样策略
+        
+        int batchSize = promptIds.getShape().getDimension(0);
+        int promptLen = promptIds.getShape().getDimension(1);
+        
+        // 创建输出序列缓冲区
+        float[][] generatedSeq = new float[batchSize][promptLen + maxNewTokens];
+        
+        // 复制提示序列
+        for (int b = 0; b < batchSize; b++) {
+            for (int t = 0; t < promptLen; t++) {
+                generatedSeq[b][t] = promptIds.get(b, t);
+            }
+        }
+        
+        // 逐个生成token
+        for (int i = 0; i < maxNewTokens; i++) {
+            int currentLen = promptLen + i;
+            
+            // 准备当前输入
+            float[][] currentInput = new float[batchSize][currentLen];
+            for (int b = 0; b < batchSize; b++) {
+                System.arraycopy(generatedSeq[b], 0, currentInput[b], 0, currentLen);
+            }
+            
+            // 前向传播
+            Variable logits = predict(new Variable(NdArray.of(currentInput)));
+            NdArray logitsArray = logits.getValue();
+            
+            // 对每个batch，选择最后一个位置的最大概率token（贪婪解码）
+            for (int b = 0; b < batchSize; b++) {
+                int nextToken = argmax(logitsArray, b, currentLen - 1);
+                generatedSeq[b][currentLen] = nextToken;
+            }
+        }
+        
+        return NdArray.of(generatedSeq);
+    }
+    
+    /**
+     * 找到指定位置的最大值索引（简化实现）
+     */
+    private int argmax(NdArray logits, int batchIdx, int seqIdx) {
+        int vocabSize = logits.getShape().getDimension(2);
+        int maxIdx = 0;
+        float maxVal = logits.get(batchIdx, seqIdx, 0);
+        
+        for (int i = 1; i < vocabSize; i++) {
+            float val = logits.get(batchIdx, seqIdx, i);
+            if (val > maxVal) {
+                maxVal = val;
+                maxIdx = i;
+            }
+        }
+        
+        return maxIdx;
+    }
+    
+    // ==================== 信息展示方法 ====================
+    
+    /**
+     * 打印详细的模型信息
+     */
+    @Override
+    public void printModelInfo() {
+        System.out.println("=".repeat(70));
+        System.out.println("GPT-3 模型详细信息");
+        System.out.println("=".repeat(70));
+        System.out.println("模型名称: " + getName());
+        System.out.println("模型描述: " + buildDescription());
+        System.out.println("-".repeat(70));
+        System.out.println(config);
+        System.out.println("-".repeat(70));
+        
+        // 打印架构细节
+        if (gpt3Block != null) {
+            gpt3Block.printArchitecture();
+        }
+        
+        System.out.println("=".repeat(70));
+    }
+    
+    /**
+     * 获取模型配置摘要
+     * 
+     * @return 配置摘要字符串
+     */
+    public String getConfigSummary() {
+        return String.format(
+            "GPT-3配置摘要:\n" +
+            "  - 词汇表大小: %,d\n" +
+            "  - 嵌入维度: %d\n" +
+            "  - Transformer层数: %d\n" +
+            "  - 注意力头数: %d\n" +
+            "  - 前馈网络维度: %d\n" +
+            "  - 最大序列长度: %d\n" +
+            "  - 并行架构: %s\n" +
+            "  - 稀疏注意力: %s\n" +
+            "  - 估算参数量: %s",
+            config.getVocabSize(),
+            config.getNEmbd(),
+            config.getNLayer(),
+            config.getNHead(),
+            config.getNInner(),
+            config.getNPositions(),
+            config.isParallelAttention() ? "是" : "否",
+            config.isSparseAttention() ? "是" : "否",
+            formatParamCount(config.estimateParameterCount())
+        );
+    }
+    
+    // ==================== Getter方法 ====================
+    
+    public GPT3Config getConfig() {
+        return config;
+    }
+    
+    public GPT3MainBlock getGPT3Block() {
+        return gpt3Block;
+    }
+    
+    /**
+     * 获取指定的Transformer块
+     * 
+     * @param index 块索引
+     * @return Transformer块
+     */
+    public GPT3TransformerBlock getTransformerBlock(int index) {
+        return gpt3Block.getTransformerBlock(index);
+    }
+    
+    @Override
+    public String toString() {
+        return String.format("GPT3Model{name='%s', params=%s, nLayer=%d, nEmbd=%d}",
+            getName(), formatParamCount(config.estimateParameterCount()), 
+            config.getNLayer(), config.getNEmbd());
+    }
+}
