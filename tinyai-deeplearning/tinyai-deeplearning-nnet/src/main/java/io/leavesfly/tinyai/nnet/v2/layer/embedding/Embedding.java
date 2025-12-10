@@ -47,34 +47,43 @@ public class Embedding extends Module {
             throw new IllegalArgumentException("Embedding requires one input indices Variable");
         }
         Variable indices = inputs[0];
-        NdArray idxValue = indices.getValue();
-        int dim = idxValue.getShape().getDimNum();
+        // 使用Variable的形状属性
+        int dim = indices.ndim();
 
         if (dim == 1) {
+            // 1D索引：直接使用getItem
+            // 这里仍然需要获取NdArray进行索引转换，属于复杂索引操作
+            NdArray idxValue = indices.getValue();
             int[] slices = NdArrayUtil.toInt(idxValue.getMatrix()[0]);
             return weight.getItem(slices, null);
         } else if (dim == 2) {
-            int batchSize = idxValue.getShape().getRow();
-            int seqLen = idxValue.getShape().getColumn();
+            // 使用Variable的size()方法
+            int batchSize = indices.size(0);
+            int seqLen = indices.size(1);
 
+            // 批量处理：为每个样本获取embedding
+            NdArray idxValue = indices.getValue();
             NdArray result = NdArray.zeros(Shape.of(batchSize, seqLen, embeddingDim));
             for (int i = 0; i < batchSize; i++) {
                 int[] slices = NdArrayUtil.toInt(idxValue.getMatrix()[i]);
                 Variable embRow = weight.getItem(slices, null);
+                // 这里需要直接操作NdArray来填充结果，是合理的使用场景
                 NdArray embVal = embRow.getValue();
                 for (int j = 0; j < seqLen; j++) {
                     for (int k = 0; k < embeddingDim; k++) {
                         result.set(embVal.get(j, k), i, j, k);
-                    }
+                    }  
                 }
             }
 
             if (seqLen == 1) {
-                result = result.reshape(Shape.of(batchSize, embeddingDim));
+                // 使用Variable的reshape方法
+                return new Variable(result).reshape(Shape.of(batchSize, embeddingDim));
             }
             return new Variable(result);
         } else {
-            throw new IllegalArgumentException("Embedding only supports 1D or 2D index tensors, got shape: " + idxValue.getShape());
+            throw new IllegalArgumentException(
+                    String.format("Embedding only supports 1D or 2D index tensors, got %dD", dim));
         }
     }
 

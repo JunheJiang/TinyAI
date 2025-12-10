@@ -152,9 +152,11 @@ public class LazyConv2d extends LazyModule {
         // 重塑权重为二维矩阵
         NdArray weightReshaped = reshapeWeight();
 
-        // 矩阵乘法计算卷积
+        // 矩阵乘法计算卷积 - 使用Variable层级操作
         Variable im2colVar = new Variable(im2colResult);
+        im2colVar.setRequireGrad(false);  // 中间结果不需要梯度
         Variable weightVar = new Variable(weightReshaped.transpose());
+        weightVar.setRequireGrad(false);  // 这个临时变量不需要梯度
         Variable output = im2colVar.matMul(weightVar);
 
         // 添加偏置
@@ -221,21 +223,12 @@ public class LazyConv2d extends LazyModule {
 
     /**
      * 添加偏置
+     * <p>
+     * 使用Variable层级的加法操作
      */
     private Variable addBias(Variable output) {
-        NdArray biasData = bias.data();
-        NdArray outputData = output.getValue();
-
-        float[][] outputMatrix = outputData.getMatrix();
-        float[] biasArray = biasData.getArray();
-
-        for (int i = 0; i < outputMatrix.length; i++) {
-            for (int j = 0; j < outputMatrix[i].length; j++) {
-                outputMatrix[i][j] += biasArray[j];
-            }
-        }
-
-        return new Variable(NdArray.of(outputMatrix));
+        // bias是Parameter，直接作为Variable参与运算
+        return output.add(bias);
     }
 
     public int getInChannels() {

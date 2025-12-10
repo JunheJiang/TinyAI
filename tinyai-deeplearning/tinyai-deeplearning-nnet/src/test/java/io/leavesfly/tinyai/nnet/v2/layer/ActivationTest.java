@@ -7,6 +7,7 @@ import io.leavesfly.tinyai.nnet.v2.layer.activation.ReLU;
 import io.leavesfly.tinyai.nnet.v2.layer.activation.Sigmoid;
 import io.leavesfly.tinyai.nnet.v2.layer.activation.SoftMax;
 import io.leavesfly.tinyai.nnet.v2.layer.activation.Tanh;
+import io.leavesfly.tinyai.nnet.v2.util.GradientChecker;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -76,6 +77,34 @@ public class ActivationTest {
         float[] trainOut = relu.forward(input).getValue().getArray();
 
         assertArrayEquals(evalOut, trainOut, 1e-6f);
+    }
+
+    @Test
+    public void testReLUGradientCheck() {
+        ReLU relu = new ReLU();
+        Variable input = new Variable(NdArray.randn(Shape.of(32, 64)));
+        GradientChecker.checkGraphConnectivity(relu, input);
+    }
+
+    @Test
+    public void testSigmoidGradientCheck() {
+        Sigmoid sigmoid = new Sigmoid();
+        Variable input = new Variable(NdArray.randn(Shape.of(32, 64)));
+        GradientChecker.checkGraphConnectivity(sigmoid, input);
+    }
+
+    @Test
+    public void testTanhGradientCheck() {
+        Tanh tanh = new Tanh();
+        Variable input = new Variable(NdArray.randn(Shape.of(32, 64)));
+        GradientChecker.checkGraphConnectivity(tanh, input);
+    }
+
+    @Test
+    public void testSoftMaxGradientCheck() {
+        SoftMax softmax = new SoftMax();
+        Variable input = new Variable(NdArray.randn(Shape.of(32, 64)));
+        GradientChecker.checkGraphConnectivity(softmax, input);
     }
 }
 

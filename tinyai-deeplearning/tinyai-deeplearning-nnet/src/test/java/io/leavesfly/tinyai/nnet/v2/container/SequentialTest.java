@@ -5,6 +5,7 @@ import io.leavesfly.tinyai.ndarr.NdArray;
 import io.leavesfly.tinyai.ndarr.Shape;
 import io.leavesfly.tinyai.nnet.v2.layer.dnn.Linear;
 import io.leavesfly.tinyai.nnet.v2.layer.activation.ReLU;
+import io.leavesfly.tinyai.nnet.v2.util.GradientChecker;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -120,5 +121,19 @@ public class SequentialTest {
         assertThrows(IllegalStateException.class, () -> {
             model.forward(input);
         });
+    }
+
+    @Test
+    public void testSequentialGradientCheck() {
+        Sequential model = new Sequential("test")
+            .add(new Linear("fc1", 128, 64))
+            .add(new ReLU())
+            .add(new Linear("fc2", 64, 10));
+
+        NdArray inputData = NdArray.randn(Shape.of(32, 128));
+        Variable input = new Variable(inputData);
+        
+        // 使用 GradientChecker 检查计算图连通性
+        GradientChecker.checkGraphConnectivity(model, input);
     }
 }

@@ -5,6 +5,7 @@ import io.leavesfly.tinyai.ndarr.NdArray;
 import io.leavesfly.tinyai.ndarr.Shape;
 import io.leavesfly.tinyai.nnet.v1.ParameterV1;
 import io.leavesfly.tinyai.nnet.v1.block.MlpBlock;
+
 import io.leavesfly.tinyai.util.Config;
 import org.junit.Before;
 import org.junit.Test;

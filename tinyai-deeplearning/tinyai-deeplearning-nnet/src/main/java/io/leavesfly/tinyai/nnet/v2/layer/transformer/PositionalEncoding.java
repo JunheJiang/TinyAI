@@ -111,6 +111,7 @@ public class PositionalEncoding extends Module {
     @Override
     public Variable forward(Variable... inputs) {
         Variable x = inputs[0];
+        // 获取形状信息用于控制流和验证，这是允许的
         NdArray inputData = x.getValue();
         int[] dims = inputData.getShape().getShapeDims();
 
@@ -139,6 +140,7 @@ public class PositionalEncoding extends Module {
         NdArray pe = getBuffer("pe");
 
         // 提取对应序列长度的位置编码 (seqLen, dModel)
+        // 这里需要直接操作NdArray来切片数据
         float[] peSlice = new float[seqLen * dModel];
         float[] peArray = pe.getArray();
         System.arraycopy(peArray, 0, peSlice, 0, seqLen * dModel);
@@ -147,8 +149,9 @@ public class PositionalEncoding extends Module {
         // 将位置编码添加到输入
         // 需要广播到batch维度
         Variable peVar = new Variable(peSeq);
+        peVar.setRequireGrad(false);  // 位置编码不需要梯度
 
-        // 添加位置编码到输入
+        // 添加位置编码到输入 - 使用Variable层级的add操作
         Variable output = x.add(peVar);
 
         // 应用dropout（训练模式）

@@ -1,6 +1,5 @@
 package io.leavesfly.tinyai.ndarr;
 
-import io.leavesfly.tinyai.ndarr.cpu.NdArrayCpu;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -301,8 +300,8 @@ public class NdArrayTest {
     @Test
     public void testSoftMaxMultiDimDefaultAxis() {
         float[][][] data = new float[][][]{
-                { {1f, 2f, 3f, 4f}, {0f, -1f, 1f, 2f}, {10f, 11f, 9f, 8f} },
-                { {4f, 3f, 2f, 1f}, {2f, 1f, 0f, -1f}, {8f, 9f, 11f, 10f} }
+                {{1f, 2f, 3f, 4f}, {0f, -1f, 1f, 2f}, {10f, 11f, 9f, 8f}},
+                {{4f, 3f, 2f, 1f}, {2f, 1f, 0f, -1f}, {8f, 9f, 11f, 10f}}
         };
         NdArray input = NdArray.of(data);
         NdArray result = input.softMax(); // 默认沿最后一维
@@ -327,13 +326,13 @@ public class NdArrayTest {
     @Test
     public void testSoftMaxAxisSpecified3D() {
         float[][][] data = new float[][][]{
-                { {1f, 2f, 3f}, {4f, 5f, 6f} },
-                { {2f, 1f, 0f}, {6f, 5f, 4f} }
+                {{1f, 2f, 3f}, {4f, 5f, 6f}},
+                {{2f, 1f, 0f}, {6f, 5f, 4f}}
         };
-        NdArrayCpu cpuInput = (NdArrayCpu) NdArray.of(data);
+        NdArray cpuInput = NdArray.of(data);
 
         // axis = 0（沿第0维）：对每个 (j,k) 位置的两个元素做softmax
-        NdArrayCpu axis0 = cpuInput.softMax(0);
+        NdArray axis0 = cpuInput.softMax(0);
         int d0 = cpuInput.getShape().getDimension(0);
         int d1 = cpuInput.getShape().getDimension(1);
         int d2 = cpuInput.getShape().getDimension(2);
@@ -350,7 +349,7 @@ public class NdArrayTest {
         }
 
         // axis = 1（沿第1维）：对每个 (i,k) 位置的两个元素做softmax
-        NdArrayCpu axis1 = cpuInput.softMax(1);
+        NdArray axis1 = cpuInput.softMax(1);
         for (int i = 0; i < d0; i++) {
             for (int k = 0; k < d2; k++) {
                 float sum = 0f;
@@ -364,7 +363,7 @@ public class NdArrayTest {
         }
 
         // axis = 2（沿第2维）：每个 (i,j,:) 和为1
-        NdArrayCpu axis2 = cpuInput.softMax(2);
+        NdArray axis2 = cpuInput.softMax(2);
         for (int i = 0; i < d0; i++) {
             for (int j = 0; j < d1; j++) {
                 float sum = 0f;
@@ -381,13 +380,13 @@ public class NdArrayTest {
     @Test
     public void testSoftMaxNegativeAxisEqualsPositive() {
         float[][][] data = new float[][][]{
-                { {1f, 2f, 3f}, {3f, 2f, 1f} },
-                { {0f, 0f, 0f}, {1f, 1f, 1f} }
+                {{1f, 2f, 3f}, {3f, 2f, 1f}},
+                {{0f, 0f, 0f}, {1f, 1f, 1f}}
         };
-        NdArrayCpu cpuInput = (NdArrayCpu) NdArray.of(data);
+        NdArray cpuInput = NdArray.of(data);
 
-        NdArrayCpu lastAxisPos = cpuInput.softMax(2);
-        NdArrayCpu lastAxisNeg = cpuInput.softMax(-1);
+        NdArray lastAxisPos = cpuInput.softMax(2);
+        NdArray lastAxisNeg = cpuInput.softMax(-1);
 
         int d0 = cpuInput.getShape().getDimension(0);
         int d1 = cpuInput.getShape().getDimension(1);
@@ -443,10 +442,10 @@ public class NdArrayTest {
     @Test(expected = IllegalArgumentException.class)
     public void testSoftMaxAxisOutOfBounds() {
         float[][][] data = new float[][][]{
-                { {1f, 2f}, {3f, 4f} },
-                { {5f, 6f}, {7f, 8f} }
+                {{1f, 2f}, {3f, 4f}},
+                {{5f, 6f}, {7f, 8f}}
         };
-        NdArrayCpu cpuInput = (NdArrayCpu) NdArray.of(data);
+        NdArray cpuInput = NdArray.of(data);
         // 3D 的合法轴为 0/1/2，这里传 3 触发异常
         cpuInput.softMax(3);
     }
@@ -631,7 +630,7 @@ public class NdArrayTest {
         // 测试双曲正切函数
         NdArray input = NdArray.of(new float[]{-1f, 0f, 1f});
         NdArray tanhResult = input.tanh();
-        
+
         // tanh(-1) ≈ -0.762, tanh(0) = 0, tanh(1) ≈ 0.762
         assertTrue(tanhResult.getMatrix()[0][0] < 0);
         assertEquals(0f, tanhResult.getMatrix()[0][1], 1e-6);
@@ -643,12 +642,12 @@ public class NdArrayTest {
         // 测试Sigmoid函数
         NdArray input = NdArray.of(new float[]{-10f, 0f, 10f});
         NdArray sigmoidResult = input.sigmoid();
-        
+
         // sigmoid(-10) ≈ 0, sigmoid(0) = 0.5, sigmoid(10) ≈ 1
         assertTrue(sigmoidResult.getMatrix()[0][0] < 0.1);
         assertEquals(0.5f, sigmoidResult.getMatrix()[0][1], 1e-5);
         assertTrue(sigmoidResult.getMatrix()[0][2] > 0.9);
-        
+
         // 验证所有值都在(0,1)区间内
         float[][] matrix = sigmoidResult.getMatrix();
         for (int i = 0; i < matrix.length; i++) {
@@ -663,7 +662,7 @@ public class NdArrayTest {
         // 测试随机数组的形状和范围
         NdArray randomUniform = NdArray.likeRandom(-2f, 3f, Shape.of(3, 4));
         assertEquals(Shape.of(3, 4), randomUniform.getShape());
-        
+
         // 验证随机数在指定范围内
         float[][] randomMatrix = randomUniform.getMatrix();
         for (int i = 0; i < randomMatrix.length; i++) {
@@ -700,10 +699,10 @@ public class NdArrayTest {
     public void testAdvancedSlicing() {
         // 测试更复杂的切片操作
         NdArray large = NdArray.of(new float[][]{
-            {1, 2, 3, 4, 5},
-            {6, 7, 8, 9, 10},
-            {11, 12, 13, 14, 15},
-            {16, 17, 18, 19, 20}
+                {1, 2, 3, 4, 5},
+                {6, 7, 8, 9, 10},
+                {11, 12, 13, 14, 15},
+                {16, 17, 18, 19, 20}
         });
 
         // 测试不连续的行选择
@@ -729,7 +728,7 @@ public class NdArrayTest {
     public void testVarianceCalculation() {
         // 测试方差计算
         NdArray data = NdArray.of(new float[][]{{1, 2, 3}, {4, 5, 6}});
-        
+
         // 测试按列计算方差 (axis=0)
         NdArray varAxis0 = data.var(0);
         // 第一列: [1,4] 均值=2.5, 方差=((1-2.5)^2+(4-2.5)^2)/2 = 2.25
@@ -737,13 +736,13 @@ public class NdArrayTest {
         // 第三列: [3,6] 均值=4.5, 方差=((3-4.5)^2+(6-4.5)^2)/2 = 2.25
         float[][] expectedVar0 = {{2.25f, 2.25f, 2.25f}};
         assertArrayEquals(expectedVar0, varAxis0.getMatrix());
-        
+
         // 测试按行计算方差 (axis=1)
         NdArray varAxis1 = data.var(1);
         // 第一行: [1,2,3] 均值=2, 方差=((1-2)^2+(2-2)^2+(3-2)^2)/3 = 2/3
         // 第二行: [4,5,6] 均值=5, 方差=((4-5)^2+(5-5)^2+(6-5)^2)/3 = 2/3
         // var(1) 应该返回形状为 [2] 的一维数组，getMatrix() 会将其转为 [[val1, val2]]
-        float[][] expectedVar1 = {{2f/3f, 2f/3f}};
+        float[][] expectedVar1 = {{2f / 3f, 2f / 3f}};
         assertArrayEquals(expectedVar1, varAxis1.getMatrix());
     }
 
@@ -752,7 +751,7 @@ public class NdArrayTest {
         // 测试裁剪函数
         NdArray data = NdArray.of(new float[][]{{-5, 0, 2}, {8, -2, 10}});
         NdArray clipped = data.clip(-1f, 5f);
-        
+
         float[][] expected = {{-1, 0, 2}, {5, -1, 5}};
         assertArrayEquals(expected, clipped.getMatrix());
     }
@@ -761,15 +760,15 @@ public class NdArrayTest {
     public void testMinMax() {
         // 测试最小值和最大值函数
         NdArray data = NdArray.of(new float[][]{{1, 8, 3}, {2, 5, 9}});
-        
+
         // 测试全局最大值  
         assertEquals(9f, data.max(), 1e-6);
-        
+
         // 测试按列最小值 (axis=0)
         NdArray minAxis0 = data.min(0);
         float[][] expectedMin0 = {{1, 5, 3}};
         assertArrayEquals(expectedMin0, minAxis0.getMatrix());
-        
+
         // 测试按行最小值 (axis=1)
         NdArray minAxis1 = data.min(1);
         float[][] expectedMin1 = {{1}, {2}};
@@ -806,7 +805,7 @@ public class NdArrayTest {
         NdArray matrix = NdArray.of(new float[][]{{1, 2, 3}, {4, 5, 6}});
         NdArray transposed = matrix.transpose();
         assertEquals(Shape.of(3, 2), transposed.getShape());
-        
+
         float[][] expected = {{1, 4}, {2, 5}, {3, 6}};
         assertArrayEquals(expected, transposed.getMatrix());
     }
@@ -815,15 +814,15 @@ public class NdArrayTest {
     public void testGetAndSetOperations() {
         // 测试get和set操作
         NdArray array = NdArray.of(new float[][]{{1, 2, 3}, {4, 5, 6}});
-        
+
         // 测试get
         assertEquals(5f, array.get(1, 1), 1e-6);
         assertEquals(3f, array.get(0, 2), 1e-6);
-        
+
         // 测试set
         array.set(99f, 1, 1);
         assertEquals(99f, array.get(1, 1), 1e-6);
-        
+
         // 确保其他元素没有改变
         assertEquals(4f, array.get(1, 0), 1e-6);
         assertEquals(6f, array.get(1, 2), 1e-6);
@@ -845,16 +844,16 @@ public class NdArrayTest {
     public void testMultiDimensionalArrayCreation() {
         // 测试三维数组创建
         float[][][] data3d = {
-            {{1, 2}, {3, 4}},
-            {{5, 6}, {7, 8}}
+                {{1, 2}, {3, 4}},
+                {{5, 6}, {7, 8}}
         };
         NdArray array3d = NdArray.of(data3d);
         assertEquals(Shape.of(2, 2, 2), array3d.getShape());
         assertArrayEquals(data3d, array3d.get3dArray());
-        
+
         // 测试四维数组创建
         float[][][][] data4d = {
-            {{{1, 2}, {3, 4}}, {{5, 6}, {7, 8}}}
+                {{{1, 2}, {3, 4}}, {{5, 6}, {7, 8}}}
         };
         NdArray array4d = NdArray.of(data4d);
         assertEquals(Shape.of(1, 2, 2, 2), array4d.getShape());
@@ -865,7 +864,7 @@ public class NdArrayTest {
     public void testSumToOperation() {
         // 测试sumTo操作
         NdArray large = NdArray.of(new float[][]{{1, 2, 3, 4}, {5, 6, 7, 8}});
-        
+
         // sumTo操作需要维度兼容：源维度=目标维度 或 目标维度=1
         // 从 [2,4] 到 [1,4] - 第一个维度从2压缩到1
         NdArray summed1 = large.sumTo(Shape.of(1, 4));
@@ -873,7 +872,7 @@ public class NdArrayTest {
         // 结果应该是: [1+5, 2+6, 3+7, 4+8] = [6, 8, 10, 12]
         float[][] expected1 = {{6, 8, 10, 12}};
         assertArrayEquals(expected1, summed1.getMatrix());
-        
+
         // 从 [2,4] 到 [2,1] - 第二个维度从4压缩到1
         NdArray summed2 = large.sumTo(Shape.of(2, 1));
         assertEquals(Shape.of(2, 1), summed2.getShape());
@@ -887,25 +886,25 @@ public class NdArrayTest {
         // 测试like方法
         NdArray original = NdArray.of(new float[][]{{1, 2}, {3, 4}});
         NdArray liked = original.like(7);
-        
+
         assertEquals(original.getShape(), liked.getShape());
         float[][] expectedLike = {{7, 7}, {7, 7}};
         assertArrayEquals(expectedLike, liked.getMatrix());
     }
 
-    @Test 
+    @Test
     public void testSetItemOperation() {
         // 测试setItem操作
         NdArray array = NdArray.of(new float[][]{{1, 2, 3}, {4, 5, 6}, {7, 8, 9}});
-        
+
         // 设置特定位置的值
         float[] newData = {99, 88};
         array.setItem(new int[]{0, 2}, new int[]{1, 1}, newData);
-        
+
         // 验证修改后的值
         assertEquals(99f, array.get(0, 1), 1e-6);
         assertEquals(88f, array.get(2, 1), 1e-6);
-        
+
         // 验证其他值没有改变
         assertEquals(1f, array.get(0, 0), 1e-6);
         assertEquals(9f, array.get(2, 2), 1e-6);
@@ -917,7 +916,7 @@ public class NdArrayTest {
         NdArray.linSpace(0, 10, 0); // 数量为0
     }
 
-    @Test(expected = IllegalArgumentException.class) 
+    @Test(expected = IllegalArgumentException.class)
     public void testInvalidClip() {
         // 测试无效的clip参数
         NdArray array = NdArray.of(new float[]{1, 2, 3});
@@ -929,12 +928,12 @@ public class NdArrayTest {
         // 测试比较操作的更多情况
         NdArray a = NdArray.of(new float[][]{{1, 5}, {3, 2}});
         NdArray b = NdArray.of(new float[][]{{2, 3}, {3, 4}});
-        
+
         // 测试小于比较
         NdArray ltResult = a.lt(b);
         float[][] expectedLt = {{1, 0}, {0, 1}}; // 1<2, 5>3, 3=3, 2<4
         assertArrayEquals(expectedLt, ltResult.getMatrix());
-        
+
         // 测试大于比较  
         NdArray gtResult = a.gt(b);
         float[][] expectedGt = {{0, 1}, {0, 0}}; // 1<2, 5>3, 3=3, 2<4

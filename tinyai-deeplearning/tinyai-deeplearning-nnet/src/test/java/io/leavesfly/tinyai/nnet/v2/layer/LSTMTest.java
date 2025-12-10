@@ -4,6 +4,7 @@ import io.leavesfly.tinyai.func.Variable;
 import io.leavesfly.tinyai.ndarr.NdArray;
 import io.leavesfly.tinyai.ndarr.Shape;
 import io.leavesfly.tinyai.nnet.v2.layer.rnn.LSTM;
+import io.leavesfly.tinyai.nnet.v2.util.GradientChecker;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -167,5 +168,25 @@ public class LSTMTest {
 
         assertEquals(customHidden, lstm.getHiddenState());
         assertEquals(customCell, lstm.getCellState());
+    }
+
+    @Test
+    public void testLSTMGradientCheck() {
+        LSTM lstm = new LSTM("lstm", 10, 20, true);
+        NdArray inputData = NdArray.randn(Shape.of(4, 10));
+        Variable input = new Variable(inputData);
+        
+        // 使用 GradientChecker 检查计算图连通性
+        GradientChecker.checkGraphConnectivity(lstm, input);
+    }
+
+    @Test
+    public void testLSTMWithoutBiasGradientCheck() {
+        LSTM lstm = new LSTM("lstm", 10, 20, false);
+        NdArray inputData = NdArray.randn(Shape.of(4, 10));
+        Variable input = new Variable(inputData);
+        
+        // 使用 GradientChecker 检查计算图连通性
+        GradientChecker.checkGraphConnectivity(lstm, input);
     }
 }

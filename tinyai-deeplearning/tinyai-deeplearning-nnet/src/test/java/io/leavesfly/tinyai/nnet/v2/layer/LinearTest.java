@@ -4,6 +4,7 @@ import io.leavesfly.tinyai.func.Variable;
 import io.leavesfly.tinyai.ndarr.NdArray;
 import io.leavesfly.tinyai.ndarr.Shape;
 import io.leavesfly.tinyai.nnet.v2.layer.dnn.Linear;
+import io.leavesfly.tinyai.nnet.v2.util.GradientChecker;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -104,5 +105,25 @@ public class LinearTest {
         assertTrue(str.contains("fc"));
         assertTrue(str.contains("128"));
         assertTrue(str.contains("64"));
+    }
+
+    @Test
+    public void testLinearGradientCheck() {
+        Linear layer = new Linear("fc", 128, 64, true);
+        NdArray inputData = NdArray.randn(Shape.of(32, 128));
+        Variable input = new Variable(inputData);
+        
+        // 使用 GradientChecker 检查计算图连通性
+        GradientChecker.checkGraphConnectivity(layer, input);
+    }
+
+    @Test
+    public void testLinearWithoutBiasGradientCheck() {
+        Linear layer = new Linear("fc", 128, 64, false);
+        NdArray inputData = NdArray.randn(Shape.of(32, 128));
+        Variable input = new Variable(inputData);
+        
+        // 使用 GradientChecker 检查计算图连通性
+        GradientChecker.checkGraphConnectivity(layer, input);
     }
 }

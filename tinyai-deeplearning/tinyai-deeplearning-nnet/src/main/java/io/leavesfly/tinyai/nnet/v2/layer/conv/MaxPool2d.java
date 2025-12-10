@@ -87,29 +87,31 @@ public class MaxPool2d extends Module {
     @Override
     public Variable forward(Variable... inputs) {
         Variable x = inputs[0];
-        NdArray inputData = x.getValue();
-
-        // 检查输入形状
-        int[] dims = inputData.getShape().getShapeDims();
-        if (dims.length != 4) {
+        // 使用Variable的形状属性
+        int dim = x.ndim();
+        if (dim != 4) {
             throw new IllegalArgumentException(
-                    String.format("Expected 4D input (batch, channels, height, width), but got %dD", dims.length));
+                    String.format("Expected 4D input (batch, channels, height, width), but got %dD", dim));
         }
 
-        int batchSize = dims[0];
-        int channels = dims[1];
-        int height = dims[2];
-        int width = dims[3];
+        int batchSize = x.size(0);
+        int channels = x.size(1);
+        int height = x.size(2);
+        int width = x.size(3);
 
         // 计算输出尺寸
         int outputHeight = (height + 2 * padding - kernelHeight) / stride + 1;
         int outputWidth = (width + 2 * padding - kernelWidth) / stride + 1;
 
-        // 执行最大池化
+        // 执行最大池化（需要复杂的索引操作）
+        NdArray inputData = x.getValue();
         NdArray output = performMaxPooling(inputData, batchSize, channels,
                                           height, width, outputHeight, outputWidth);
 
-        return new Variable(output);
+        // 返回新的Variable
+        Variable result = new Variable(output);
+        result.setRequireGrad(x.isRequireGrad());  // 继承梯度设置
+        return result;
     }
 
     /**

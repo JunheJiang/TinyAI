@@ -113,6 +113,96 @@ public class Variable implements Serializable {
         return requireGrad;
     }
 
+    // =============================================================================
+    // 形状和维度相关的便捷属性方法（类似 PyTorch 的设计）
+    // 避免在 Module 中直接调用 getValue().getShape()
+    // 注意：getShape() 方法已在其他位置定义
+    // =============================================================================
+
+    /**
+     * 获取变量的维度数量
+     * <p>
+     * 例如：标量返回1（TinyAI中标量也是1维），向量返回1，矩阵返回2，3D张量返回3
+     *
+     * @return 维度数量
+     */
+    public int ndim() {
+        return value.getShape().getDimNum();
+    }
+
+    /**
+     * 获取指定维度的大小
+     * <p>
+     * 支持负数索引：-1 表示最后一维，-2 表示倒数第二维
+     *
+     * @param dim 维度索引
+     * @return 该维度的大小
+     */
+    public int size(int dim) {
+        Shape shape = value.getShape();
+        int ndim = shape.getDimNum();
+        
+        // 处理负数索引
+        if (dim < 0) {
+            dim = ndim + dim;
+        }
+        
+        if (dim < 0 || dim >= ndim) {
+            throw new IndexOutOfBoundsException(
+                    String.format("Dimension out of range (expected to be in range of [-%d, %d), but got %d)",
+                            ndim, ndim, dim));
+        }
+        
+        return shape.getDimension(dim);
+    }
+
+    /**
+     * 获取所有维度的大小数组
+     * <p>
+     * 返回一个包含所有维度大小的数组
+     *
+     * @return 维度大小数组
+     */
+    public int[] sizes() {
+        return value.getShape().getShapeDims();
+    }
+
+    /**
+     * 获取张量中元素的总数
+     *
+     * @return 元素总数
+     */
+    public int numel() {
+        return value.getShape().size();
+    }
+
+    /**
+     * 判断变量是否是标量（只有一个元素）
+     *
+     * @return 如果是标量返回true
+     */
+    public boolean isScalar() {
+        return value.getShape().size() == 1;
+    }
+
+    /**
+     * 判断变量是否是矩阵（2维张量）
+     *
+     * @return 如果是矩阵返回true
+     */
+    public boolean isMatrix() {
+        return value.getShape().isMatrix();
+    }
+
+    /**
+     * 判断变量是否是向量（1维张量）
+     *
+     * @return 如果是向量返回true
+     */
+    public boolean isVector() {
+        return value.getShape().getDimNum() == 1;
+    }
+
     /**
      * 变量的反向传播（递归实现）
      * <p>
@@ -143,11 +233,18 @@ public class Variable implements Serializable {
             }
             int index = 0;
             for (Variable input : _inputs) {
+                NdArray inputGrad = grads.get(index);
+                // 如果梯度为null，跳过该输入（例如索引不可导）
+                if (inputGrad == null) {
+                    index++;
+                    continue;
+                }
+                
                 // 累加梯度而不是直接设置，支持梯度复用
                 if (input.getGrad() != null) {
-                    input.setGrad(input.getGrad().add(grads.get(index)));
+                    input.setGrad(input.getGrad().add(inputGrad));
                 } else {
-                    input.setGrad(grads.get(index));
+                    input.setGrad(inputGrad);
                 }
                 input.backward();
                 index++;
@@ -197,6 +294,11 @@ public class Variable implements Serializable {
             for (int i = 0; i < inputs.length; i++) {
                 Variable input = inputs[i];
                 NdArray grad = grads.get(i);
+                
+                // 如果梯度为null，跳过该输入（例如索引不可导）
+                if (grad == null) {
+                    continue;
+                }
 
                 // 累加梯度而不是直接设置，支持梯度复用
                 if (input.getGrad() != null) {
@@ -818,5 +920,530 @@ public class Variable implements Serializable {
      */
     public Variable softmaxCrossEntropy(Variable other) {
         return new SoftmaxCE().call(this, other);
+    }
+
+    //    # =============================================================================
+//            # 5，新增算子（支持Transformer/LLM训练）
+//    # =============================================================================
+
+    /**
+     * 压缩维度
+     * <p>
+     * 移除所有大小为1的维度
+     *
+     * @return 压缩后的新变量
+     */
+    public Variable squeeze() {
+        Function function = new Squeeze();
+        return function.call(this);
+    }
+
+    /**
+     * 压缩指定维度
+     * <p>
+     * 移除指定维度（如果大小为1）
+     *
+     * @param dim 要移除的维度索引（支持负数索引）
+     * @return 压缩后的新变量
+     */
+    public Variable squeeze(int dim) {
+        Function function = new Squeeze(dim);
+        return function.call(this);
+    }
+
+    /**
+     * 切断梯度
+     * <p>
+     * 从计算图中分离变量，停止梯度传播
+     *
+     * @return 切断梯度后的新变量（requireGrad=false）
+     */
+    public Variable detach() {
+        Function function = new Detach();
+        Variable result = function.call(this);
+        result.setRequireGrad(false);
+        return result;
+    }
+
+    /**
+     * 创建同形状全1张量
+     *
+     * @return 与当前变量同形状的全1张量
+     */
+    public Variable onesLike() {
+        Function function = new OnesLike();
+        return function.call(this);
+    }
+
+    /**
+     * 创建同形状全0张量
+     *
+     * @return 与当前变量同形状的全0张量
+     */
+    public Variable zerosLike() {
+        Function function = new ZerosLike();
+        return function.call(this);
+    }
+
+    /**
+     * 克隆张量
+     * <p>
+     * 深拷贝张量的值，返回新的叶子节点
+     *
+     * @return 克隆后的新变量
+     */
+    public Variable clone() {
+        Function function = new Clone();
+        return function.call(this);
+    }
+
+    /**
+     * 扩展维度（广播语义）
+     * <p>
+     * 将大小为1的维度扩展到指定大小，不复制数据
+     *
+     * @param shape 目标形状
+     * @return 扩展后的新变量
+     */
+    public Variable expand(Shape shape) {
+        Function function = new Expand(shape);
+        return function.call(this);
+    }
+
+    /**
+     * 重复张量
+     * <p>
+     * 沿指定维度重复张量（复制数据）
+     *
+     * @param repeats 每个维度重复的次数
+     * @return 重复后的新变量
+     */
+    public Variable repeat(int... repeats) {
+        Function function = new Repeat(repeats);
+        return function.call(this);
+    }
+
+    /**
+     * 下三角矩阵
+     * <p>
+     * 返回下三角部分，上三角部分置为0
+     *
+     * @param k 对角线偏移（k=0表示主对角线及以下）
+     * @return 下三角矩阵
+     */
+    public Variable tril(int k) {
+        Function function = new Tril(k);
+        return function.call(this);
+    }
+
+    /**
+     * 下三角矩阵（默认k=0）
+     *
+     * @return 下三角矩阵
+     */
+    public Variable tril() {
+        return tril(0);
+    }
+
+    /**
+     * 批量矩阵乘法
+     * <p>
+     * 输入: [batch, n, m] @ [batch, m, p] -> [batch, n, p]
+     *
+     * @param other 另一个变量
+     * @return 批量矩阵乘法结果
+     */
+    public Variable bmm(Variable other) {
+        Function function = new BMM();
+        return function.call(this, other);
+    }
+
+    /**
+     * 条件选择
+     * <p>
+     * where(condition, x, y): condition为true选x，否则选y
+     *
+     * @param condition 条件变量
+     * @param x        条件为true时选择的值
+     * @param y        条件为false时选择的值
+     * @return 条件选择结果
+     */
+    public static Variable where(Variable condition, Variable x, Variable y) {
+        Function function = new Where();
+        return function.call(condition, x, y);
+    }
+
+    /**
+     * 索引选择
+     * <p>
+     * 沿指定维度选择索引对应的元素
+     *
+     * @param dim   维度索引
+     * @param index 索引变量
+     * @return 索引选择结果
+     */
+    public Variable indexSelect(int dim, Variable index) {
+        Function function = new IndexSelect(dim);
+        return function.call(this, index);
+    }
+
+    /**
+     * 分散累加
+     * <p>
+     * 将源张量的值根据索引分散到目标张量的指定位置并累加
+     *
+     * @param dim   维度索引
+     * @param index 索引变量
+     * @param src   源变量
+     * @return 分散累加结果
+     */
+    public Variable scatterAdd(int dim, Variable index, Variable src) {
+        Function function = new ScatterAdd(dim);
+        return function.call(this, index, src);
+    }
+
+    /**
+     * RMS归一化
+     * <p>
+     * RMSNorm(x) = x / sqrt(mean(x²) + eps) * weight
+     *
+     * @param normalizedShape 归一化的维度形状
+     * @param eps            epsilon值
+     * @param weight         可学习的缩放权重
+     * @return RMS归一化结果
+     */
+    public Variable rmsNorm(int[] normalizedShape, float eps, Variable weight) {
+        Function function = new RMSNorm(normalizedShape, eps);
+        return function.call(this, weight);
+    }
+
+    /**
+     * RMS归一化（默认eps=1e-6）
+     *
+     * @param normalizedShape 归一化的维度形状
+     * @param weight         可学习的缩放权重
+     * @return RMS归一化结果
+     */
+    public Variable rmsNorm(int[] normalizedShape, Variable weight) {
+        return rmsNorm(normalizedShape, 1e-6f, weight);
+    }
+
+    // =============================================================================
+    // 额外的工具方法 - 支持 Module 中完全停留在 Variable 世界
+    // =============================================================================
+
+    /**
+     * 创建指定值填充的同形状张量
+     * <p>
+     * 类似 PyTorch 的 full_like
+     *
+     * @param value 填充值
+     * @return 填充后的新变量
+     */
+    public Variable fullLike(float value) {
+        NdArray filledArray = NdArray.like(this.getShape(), value);
+        Variable result = new Variable(filledArray);
+        result.setRequireGrad(false);  // 常量不需要梯度
+        return result;
+    }
+
+    /**
+     * 使用指定值填充张量（就地操作的Variable版本）
+     * <p>
+     * 返回新的Variable，值为指定填充值
+     *
+     * @param value 填充值
+     * @return 填充后的新变量
+     */
+    public Variable fill(float value) {
+        return fullLike(value);
+    }
+
+    /**
+     * 掩码填充
+     * <p>
+     * 类似 PyTorch 的 masked_fill
+     * 在mask为true的位置用指定值填充
+     *
+     * @param mask  掩码变量（布尔值或0/1）
+     * @param value 填充值
+     * @return 掩码填充后的新变量
+     */
+    public Variable maskedFill(Variable mask, float value) {
+        // 使用 where 函数实现: where(mask, value, this)
+        Variable fillValue = new Variable(value);
+        fillValue.setRequireGrad(false);
+        return Variable.where(mask, fillValue, this);
+    }
+
+    /**
+     * 获取数据类型信息
+     * <p>
+     * 返回底层数据的类型描述（用于调试）
+     *
+     * @return 数据类型字符串
+     */
+    public String dtype() {
+        return "float32";  // TinyAI 目前主要使用 float32
+    }
+
+    /**
+     * 创建新的空张量（同形状、同类型）
+     * <p>
+     * 类似 PyTorch 的 new_empty 或 empty_like
+     *
+     * @return 新的未初始化变量
+     */
+    public Variable newLike() {
+        return zerosLike();  // 为安全起见，返回全零张量
+    }
+
+    /**
+     * 批量获取形状（用于替代 getValue().getShape().getShapeDims()）
+     * <p>
+     * 这是 sizes() 的别名，提供更直观的命名
+     *
+     * @return 形状维度数组
+     */
+    public int[] shape() {
+        return sizes();
+    }
+
+    // =============================================================================
+    // 高级索引和切片操作 - 进一步减少对 NdArray 的直接访问
+    // =============================================================================
+
+    /**
+     * 获取指定索引的子张量（切片操作）
+     * <p>
+     * 类似 PyTorch 的 x[rowSlices, colSlices]
+     *
+     * @param rowSlices 行索引数组
+     * @param colSlices 列索引数组
+     * @return 切片结果
+     */
+    public Variable slice(int[] rowSlices, int[] colSlices) {
+        return getItem(rowSlices, colSlices);
+    }
+
+    /**
+     * 在指定维度上选择单个索引
+     * <p>
+     * 类似 PyTorch 的 x.select(dim, index)
+     *
+     * @param dim   维度索引
+     * @param index 要选择的索引位置
+     * @return 选择结果（维度会减少1）
+     */
+    public Variable select(int dim, int index) {
+        // 这里需要实现单索引选择，暂时使用 indexSelect 的简化版本
+        // 对于完整实现，需要添加对应的 Function
+        if (dim < 0) {
+            dim = ndim() + dim;
+        }
+        
+        // 简单实现：使用 getItem 模拟
+        if (dim == 0 && isMatrix()) {
+            return getItem(new int[]{index}, null);
+        } else if (dim == 1 && isMatrix()) {
+            return getItem(null, new int[]{index});
+        }
+        
+        throw new UnsupportedOperationException(
+                "select operation currently only supports 2D tensors on dim 0 or 1");
+    }
+
+    /**
+     * 在指定维度上进行范围切片
+     * <p>
+     * 类似 PyTorch 的 x[start:end]
+     *
+     * @param dim   维度索引
+     * @param start 起始索引（包含）
+     * @param end   结束索引（不包含）
+     * @return 切片结果
+     */
+    public Variable sliceRange(int dim, int start, int end) {
+        if (dim < 0) {
+            dim = ndim() + dim;
+        }
+        
+        int size = this.size(dim);
+        if (end < 0) {
+            end = size + end + 1;
+        }
+        if (start < 0) {
+            start = size + start;
+        }
+        
+        int length = end - start;
+        int[] indices = new int[length];
+        for (int i = 0; i < length; i++) {
+            indices[i] = start + i;
+        }
+        
+        if (dim == 0 && isMatrix()) {
+            return getItem(indices, null);
+        } else if (dim == 1 && isMatrix()) {
+            return getItem(null, indices);
+        }
+        
+        throw new UnsupportedOperationException(
+                "sliceRange operation currently only supports 2D tensors on dim 0 or 1");
+    }
+
+    /**
+     * 创建同设备同类型的常量张量
+     * <p>
+     * 类似 PyTorch 的 torch.full_like
+     *
+     * @param value 常量值
+     * @return 常量张量
+     */
+    public static Variable full(Shape shape, float value) {
+        NdArray array = NdArray.like(shape, value);
+        Variable result = new Variable(array);
+        result.setRequireGrad(false);
+        return result;
+    }
+
+    /**
+     * 创建全零张量
+     * <p>
+     * 类似 PyTorch 的 torch.zeros
+     *
+     * @param shape 张量形状
+     * @return 全零张量
+     */
+    public static Variable zeros(Shape shape) {
+        return new Variable(NdArray.zeros(shape));
+    }
+
+    /**
+     * 创建全一张量
+     * <p>
+     * 类似 PyTorch 的 torch.ones
+     *
+     * @param shape 张量形状
+     * @return 全一张量
+     */
+    public static Variable ones(Shape shape) {
+        return new Variable(NdArray.ones(shape));
+    }
+
+    /**
+     * 在指定维度上拼接张量
+     * <p>
+     * 类似 PyTorch 的 torch.cat
+     *
+     * @param variables 要拼接的变量数组
+     * @param dim      拼接的维度
+     * @return 拼接结果
+     */
+    public static Variable cat(Variable[] variables, int dim) {
+        Function function = new io.leavesfly.tinyai.func.matrix.Concat(dim);
+        return function.call(variables);
+    }
+
+    /**
+     * 在指定维度上分割张量
+     * <p>
+     * 类似 PyTorch 的 torch.split
+     *
+     * @param splitSize 每个分块的大小
+     * @param dim      分割的维度
+     * @return 分割结果数组
+     */
+    public Variable[] split(int splitSize, int dim) {
+        if (dim < 0) {
+            dim = ndim() + dim;
+        }
+        
+        int dimSize = size(dim);
+        int numSplits = (dimSize + splitSize - 1) / splitSize;  // 向上取整
+        Variable[] results = new Variable[numSplits];
+        
+        for (int i = 0; i < numSplits; i++) {
+            int start = i * splitSize;
+            int end = Math.min(start + splitSize, dimSize);
+            results[i] = sliceRange(dim, start, end);
+        }
+        
+        return results;
+    }
+
+    // =============================================================================
+    // 比较和随机操作 - 支持 v1 层优化
+    // =============================================================================
+
+    /**
+     * 大于比较
+     * <p>
+     * 类似 PyTorch 的 x.gt(y)
+     *
+     * @param other 比较的另一个变量
+     * @return 比较结果（0或1）
+     */
+    public Variable gt(Variable other) {
+        NdArray result = this.value.gt(other.getValue());
+        Variable resultVar = new Variable(result);
+        resultVar.setRequireGrad(false);  // 比较结果不需要梯度
+        return resultVar;
+    }
+
+    /**
+     * 小于比较
+     * <p>
+     * 类似 PyTorch 的 x.lt(y)
+     *
+     * @param other 比较的另一个变量
+     * @return 比较结果（0或1）
+     */
+    public Variable lt(Variable other) {
+        NdArray result = this.value.lt(other.getValue());
+        Variable resultVar = new Variable(result);
+        resultVar.setRequireGrad(false);  // 比较结果不需要梯度
+        return resultVar;
+    }
+
+    /**
+     * 等于比较
+     * <p>
+     * 类似 PyTorch 的 x.eq(y)
+     *
+     * @param other 比较的另一个变量
+     * @return 比较结果（0或1）
+     */
+    public Variable eq(Variable other) {
+        NdArray result = this.value.eq(other.getValue());
+        Variable resultVar = new Variable(result);
+        resultVar.setRequireGrad(false);  // 比较结果不需要梯度
+        return resultVar;
+    }
+
+    /**
+     * 创建随机均匀分布张量 [0, 1)
+     * <p>
+     * 类似 PyTorch 的 torch.rand
+     *
+     * @param shape 张量形状
+     * @return 随机张量
+     */
+    public static Variable rand(Shape shape) {
+        NdArray array = NdArray.likeRandom(0, 1, shape);
+        Variable result = new Variable(array);
+        result.setRequireGrad(false);  // 随机张量不需要梯度
+        return result;
+    }
+
+    /**创建标准正态分布随机张量
+     * <p>
+     * 类似 PyTorch 的 torch.randn
+     *
+     * @param shape 张量形状
+     * @return 随机张量
+     */
+    public static Variable randn(Shape shape) {
+        return new Variable(NdArray.randn(shape));
     }
 }

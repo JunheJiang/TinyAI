@@ -3,6 +3,7 @@ package io.leavesfly.tinyai.minimind.model.attention;
 import io.leavesfly.tinyai.func.Variable;
 import io.leavesfly.tinyai.ndarr.NdArray;
 import io.leavesfly.tinyai.ndarr.Shape;
+import io.leavesfly.tinyai.nnet.v2.util.GradientChecker;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
 
@@ -131,5 +132,23 @@ public class MultiHeadAttentionTest {
         assertEquals(batchSize, shape[0], "batch维度应为" + batchSize);
         assertEquals(seqLen, shape[1], "seq_len维度应为" + seqLen);
         assertEquals(dimModel, shape[2], "dim维度应为" + dimModel);
+    }
+
+    @Test
+    public void testMultiHeadAttentionGradientCheck() {
+        MultiHeadAttention attention = new MultiHeadAttention(
+            "test_attention",
+            dimModel,
+            numHeads,
+            maxSeqLen,
+            0.0f // dropout
+        );
+        
+        // 创建输入 (batch=1, seq_len=5, dim=64)
+        NdArray inputData = NdArray.randn(Shape.of(1, 5, dimModel));
+        Variable input = new Variable(inputData);
+        
+        // 使用 GradientChecker 检查计算图连通性
+        GradientChecker.checkGraphConnectivity(attention, input);
     }
 }

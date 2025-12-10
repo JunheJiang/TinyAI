@@ -2,7 +2,6 @@ package io.leavesfly.tinyai.ndarr.gpu;
 
 import io.leavesfly.tinyai.ndarr.NdArray;
 import io.leavesfly.tinyai.ndarr.Shape;
-import io.leavesfly.tinyai.ndarr.cpu.NdArrayCpu;
 
 /**
  * NdArray的 GPU版本
@@ -17,7 +16,7 @@ public class NdArrayGpu implements NdArray {
     }
 
     @Override
-    public NdArrayCpu add(NdArray other) {
+    public NdArray add(NdArray other) {
         return null;
     }
 
@@ -127,6 +126,11 @@ public class NdArrayGpu implements NdArray {
     }
 
     @Override
+    public NdArray softMax(int axis) {
+        return null;
+    }
+
+    @Override
     public NdArray maximum(Number number) {
         return null;
     }
@@ -149,6 +153,11 @@ public class NdArrayGpu implements NdArray {
     @Override
     public NdArray reshape(Shape newShape) {
         return null;
+    }
+
+    @Override
+    public NdArray broadcastReshape(Shape newShape) {
+        throw new UnsupportedOperationException("GPU implementation pending");
     }
 
     @Override
@@ -182,6 +191,11 @@ public class NdArrayGpu implements NdArray {
     }
 
     @Override
+    public NdArray sumToOptimized(Shape targetShape) {
+        throw new UnsupportedOperationException("GPU implementation pending");
+    }
+
+    @Override
     public NdArray broadcastTo(Shape _shape) {
         return null;
     }
@@ -204,6 +218,21 @@ public class NdArrayGpu implements NdArray {
     @Override
     public NdArray setItem(int[] _rowSlices, int[] _colSlices, float[] data) {
         return null;
+    }
+
+    @Override
+    public NdArray setBlock(int startRow, int endRow, int startCol, int endCol, float[] data) {
+        throw new UnsupportedOperationException("GPU implementation pending");
+    }
+
+    @Override
+    public NdArray setRows(int[] rowIndices, float[] data) {
+        throw new UnsupportedOperationException("GPU implementation pending");
+    }
+
+    @Override
+    public NdArray setCols(int[] colIndices, float[] data) {
+        throw new UnsupportedOperationException("GPU implementation pending");
     }
 
     @Override

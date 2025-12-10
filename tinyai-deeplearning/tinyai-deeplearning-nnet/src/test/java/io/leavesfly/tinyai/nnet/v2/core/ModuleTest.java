@@ -3,6 +3,7 @@ package io.leavesfly.tinyai.nnet.v2.core;
 import io.leavesfly.tinyai.func.Variable;
 import io.leavesfly.tinyai.ndarr.NdArray;
 import io.leavesfly.tinyai.ndarr.Shape;
+import io.leavesfly.tinyai.nnet.v2.util.GradientChecker;
 import org.junit.jupiter.api.Test;
 
 import java.util.Map;
@@ -150,6 +151,16 @@ public class ModuleTest {
             restored.getBuffer("running").getArray()[0], 1e-6f);
         assertEquals(originChild.getBuffer("running").getArray()[0],
             restoredChild.getBuffer("running").getArray()[0], 1e-6f);
+    }
+
+    @Test
+    public void testIdentityModuleGradientCheck() {
+        IdentityModule module = new IdentityModule("test", true, false);
+        NdArray inputData = NdArray.randn(Shape.of(32, 1));
+        Variable input = new Variable(inputData);
+        
+        // 使用 GradientChecker 检查计算图连通性
+        GradientChecker.checkGraphConnectivity(module, input);
     }
 }
 

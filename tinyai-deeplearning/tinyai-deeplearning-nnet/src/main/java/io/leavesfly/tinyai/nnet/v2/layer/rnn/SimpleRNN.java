@@ -131,14 +131,18 @@ public class SimpleRNN extends Module {
     @Override
     public Variable forward(Variable... inputs) {
         Variable x = inputs[0];
+        // 获取batch_size用于初始化状态，这是允许的
         int batchSize = x.getValue().getShape().getDimension(0);
 
         // 初始化状态
         initializeStateIfNeeded(batchSize);
 
+        // 将状态转为Variable进行计算
         Variable h = new Variable(hiddenState);
+        h.setRequireGrad(false);  // 状态不需要梯度（在这个实现中）
 
         // 计算新的隐藏状态: h_t = activation(W_ih @ x_t + W_hh @ h_{t-1} + b)
+        // 使用Variable层级的操作
         Variable h_new = x.matMul(W_ih.transpose()).add(h.matMul(W_hh.transpose()));
 
         if (useBias) {
@@ -148,7 +152,7 @@ public class SimpleRNN extends Module {
         // 应用激活函数
         h_new = applyActivation(h_new);
 
-        // 更新缓冲区状态
+        // 更新缓冲区状态（这里需要获取NdArray来更新状态，是合理的）
         hiddenState = h_new.getValue();
         _buffers.put("hidden_state", hiddenState);
 

@@ -4,6 +4,7 @@ import io.leavesfly.tinyai.func.Variable;
 import io.leavesfly.tinyai.ndarr.NdArray;
 import io.leavesfly.tinyai.ndarr.Shape;
 import io.leavesfly.tinyai.nnet.v2.core.Parameter;
+import io.leavesfly.tinyai.nnet.v2.util.GradientChecker;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -210,5 +211,29 @@ public class LoRALinearTest {
         assertTrue(str.contains("128"));
         assertTrue(str.contains("64"));
         assertTrue(str.contains("rank=4"));
+    }
+
+    @Test
+    public void testLoRALinearGradientCheck() {
+        LoRALinear loraLinear = new LoRALinear("lora_fc", 128, 64, true, 4, 8.0f);
+        
+        // 创建输入 (batch=16, features=128)
+        NdArray inputData = NdArray.randn(Shape.of(16, 128));
+        Variable input = new Variable(inputData);
+        
+        // 使用 GradientChecker 检查计算图连通性
+        GradientChecker.checkGraphConnectivity(loraLinear, input);
+    }
+
+    @Test
+    public void testLoRALinearWithoutBiasGradientCheck() {
+        LoRALinear loraLinear = new LoRALinear("lora_fc", 128, 64, false, 4, 8.0f);
+        
+        // 创建输入 (batch=16, features=128)
+        NdArray inputData = NdArray.randn(Shape.of(16, 128));
+        Variable input = new Variable(inputData);
+        
+        // 使用 GradientChecker 检查计算图连通性
+        GradientChecker.checkGraphConnectivity(loraLinear, input);
     }
 }

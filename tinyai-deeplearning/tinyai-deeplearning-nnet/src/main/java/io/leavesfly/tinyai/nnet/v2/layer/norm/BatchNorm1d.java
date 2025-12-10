@@ -138,14 +138,14 @@ public class BatchNorm1d extends Module {
     @Override
     public Variable forward(Variable... inputs) {
         Variable x = inputs[0];
-        NdArray inputData = x.getValue();
-        int[] dims = inputData.getShape().getShapeDims();
+        // 使用Variable的形状属性，完全停留在Variable层面
+        int[] dims = x.sizes();
 
         // 输入形状检查：(batch_size, num_features) 或 (batch_size, num_features, length)
         if (dims.length < 2 || dims[1] != numFeatures) {
             throw new IllegalArgumentException(
-                    String.format("Expected input with %d features, but got shape %s",
-                            numFeatures, inputData.getShape()));
+                    String.format("Expected input with %d features, but got shape with dims[1]=%d",
+                            numFeatures, dims.length > 1 ? dims[1] : -1));
         }
 
         int batchSize = dims[0];
@@ -220,8 +220,10 @@ public class BatchNorm1d extends Module {
     private Variable normalize(Variable x, Variable mean, Variable var) {
         // normalized = (x - mean) / sqrt(var + eps)
         Variable centered = x.sub(mean);
-        // 将标量eps广播为与方差相同的形状，避免形状(1,1)导致广播失败
-        Variable std = var.add(new Variable(var.getValue().like(eps))).sqrt();
+        // 使用Variable的算子添加eps并开方
+        Variable epsVar = new Variable(eps);
+        epsVar.setRequireGrad(false);
+        Variable std = var.add(epsVar).sqrt();
         return centered.div(std);
     }
 

@@ -4,6 +4,7 @@ import io.leavesfly.tinyai.func.Variable;
 import io.leavesfly.tinyai.minimind.model.attention.KVCache;
 import io.leavesfly.tinyai.ndarr.NdArray;
 import io.leavesfly.tinyai.ndarr.Shape;
+import io.leavesfly.tinyai.nnet.v2.util.GradientChecker;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
 
@@ -168,5 +169,25 @@ public class MiniMindTransformerLayerTest {
     public void testGetAttention() {
         // 测试获取注意力层
         assertNotNull(layer.getAttention(), "应该能获取注意力层");
+    }
+
+    @Test
+    public void testMiniMindTransformerLayerGradientCheck() {
+        MiniMindTransformerLayer layer = new MiniMindTransformerLayer(
+            "test_layer",
+            hiddenSize,
+            numHeads,
+            ffnHiddenSize,
+            maxSeqLen,
+            dropoutRate,
+            epsilon
+        );
+        
+        // 创建输入 (batch=1, seq_len=5, dim=64)
+        NdArray inputData = NdArray.randn(Shape.of(1, 5, hiddenSize));
+        Variable input = new Variable(inputData);
+        
+        // 使用 GradientChecker 检查计算图连通性
+        GradientChecker.checkGraphConnectivity(layer, input);
     }
 }

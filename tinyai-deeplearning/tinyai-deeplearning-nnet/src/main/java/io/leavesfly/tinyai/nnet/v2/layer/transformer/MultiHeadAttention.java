@@ -251,11 +251,14 @@ public class MultiHeadAttention extends Module {
      * 将布尔掩码转换为加法掩码
      * <p>
      * 输入掩码中True表示需要被屏蔽的位置
+     * <p>
+     * 注：这里需要直接操作NdArray来生成掩码，因为这是条件转换逻辑
      *
      * @param boolMask 布尔掩码
      * @return 加法掩码（被屏蔽位置为-1e9，其他位置为0）
      */
     private Variable createPaddingMaskFromBoolean(Variable boolMask) {
+        // 这是一个工具方法，需要处理条件逻辑，直接操作NdArray是合理的
         NdArray maskData = boolMask.getValue();
         float[] data = maskData.getArray();
         float[] result = new float[data.length];
@@ -265,7 +268,9 @@ public class MultiHeadAttention extends Module {
             result[i] = data[i] > 0.5f ? -1e9f : 0f;
         }
 
-        return new Variable(NdArray.of(result, maskData.getShape()));
+        Variable resultVar = new Variable(NdArray.of(result, maskData.getShape()));
+        resultVar.setRequireGrad(false);  // 掩码不需要梯度
+        return resultVar;
     }
 
     public int getDModel() {

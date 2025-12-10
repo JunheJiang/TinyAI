@@ -73,57 +73,10 @@ public class PositionalEncoding extends Layer {
         }
     }
 
-
-    private Variable layerForward0(Variable... inputs) {
-        Variable input = inputs[0];
-        NdArray inputData = input.getValue();
-
-        // 获取序列长度
-        int seqLength = inputData.getShape().getDimension(1);
-
-        // 截取对应长度的位置编码
-        // 截取对应长度的位置编码
-        NdArray posEnc = posEncoding.subNdArray(0, seqLength, 0, inputData.getShape().getDimension(2));
-
-        // 扩展位置编码以匹配batch size
-        int batchSize = inputData.getShape().getDimension(0);
-        NdArray expandedPosEnc = NdArray.zeros(Shape.of(batchSize, seqLength, inputData.getShape().getDimension(2)));
-
-        for (int i = 0; i < batchSize; i++) {
-            for (int j = 0; j < seqLength; j++) {
-                for (int k = 0; k < inputData.getShape().getDimension(2); k++) {
-                    expandedPosEnc.set(posEnc.get(j, k), i, j, k);
-                }
-            }
-        }
-
-        // 添加位置编码到输入
-        Variable result = input.add(new Variable(expandedPosEnc));
-
-        // 应用dropout（如果需要）
-        if (dropout) {
-            // 简单的dropout实现，在实际训练中需要考虑训练/推理模式
-            // 这里暂时跳过dropout的实现
-        }
-
-        return result;
-    }
-
     @Override
-    public NdArray forward(NdArray... inputs) {
-        return layerForward0(new Variable(inputs[0])).getValue();
+    public Variable layerForward(Variable... inputs) {
+        //todo
+        return null;
     }
 
-    @Override
-    public List<NdArray> backward(NdArray yGrad) {
-        // 位置编码的反向传播只是传递梯度，因为位置编码是固定的
-        List<NdArray> result = new ArrayList<>();
-        result.add(yGrad);
-        return result;
-    }
-
-    @Override
-    public int requireInputNum() {
-        return 1;
-    }
 }

@@ -87,6 +87,7 @@ public class AvgPool2d extends Module {
     @Override
     public Variable forward(Variable... inputs) {
         Variable x = inputs[0];
+        // 获取形状信息用于控制流和验证，这是允许的
         NdArray inputData = x.getValue();
 
         // 检查输入形状
@@ -105,11 +106,14 @@ public class AvgPool2d extends Module {
         int outputHeight = (height + 2 * padding - kernelHeight) / stride + 1;
         int outputWidth = (width + 2 * padding - kernelWidth) / stride + 1;
 
-        // 执行平均池化
+        // 执行平均池化（这里需要直接操作NdArray，因为池化是复杂的索引操作）
         NdArray output = performAvgPooling(inputData, batchSize, channels,
                                           height, width, outputHeight, outputWidth);
 
-        return new Variable(output);
+        // 返回新的Variable
+        Variable result = new Variable(output);
+        result.setRequireGrad(x.isRequireGrad());  // 继承梯度设置
+        return result;
     }
 
     /**

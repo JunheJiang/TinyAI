@@ -127,19 +127,17 @@ public class Conv2d extends Module {
     @Override
     public Variable forward(Variable... inputs) {
         Variable x = inputs[0];
-        NdArray inputData = x.getValue();
-
-        // 检查输入形状
-        int[] dims = inputData.getShape().getShapeDims();
-        if (dims.length != 4) {
+        // 使用Variable的形状属性
+        int dim = x.ndim();
+        if (dim != 4) {
             throw new IllegalArgumentException(
-                    String.format("Expected 4D input (batch, channels, height, width), but got %dD", dims.length));
+                    String.format("Expected 4D input (batch, channels, height, width), but got %dD", dim));
         }
 
-        int batchSize = dims[0];
-        int inputChannels = dims[1];
-        int inputHeight = dims[2];
-        int inputWidth = dims[3];
+        int batchSize = x.size(0);
+        int inputChannels = x.size(1);
+        int inputHeight = x.size(2);
+        int inputWidth = x.size(3);
 
         if (inputChannels != inChannels) {
             throw new IllegalArgumentException(
@@ -150,16 +148,19 @@ public class Conv2d extends Module {
         int outputHeight = (inputHeight + 2 * padding - kernelHeight) / stride + 1;
         int outputWidth = (inputWidth + 2 * padding - kernelWidth) / stride + 1;
 
-        // 执行Im2Col转换
+        // 执行Im2Col转换（需要复杂的NdArray操作）
+        NdArray inputData = x.getValue();
         NdArray im2colResult = performIm2Col(inputData, batchSize, inputChannels, 
                                              inputHeight, inputWidth, outputHeight, outputWidth);
 
         // 重塑权重为二维矩阵
         NdArray weightReshaped = reshapeWeight();
 
-        // 矩阵乘法计算卷积
+        // 矩阵乘法计算卷积 - 使用Variable层级操作
         Variable im2colVar = new Variable(im2colResult);
+        im2colVar.setRequireGrad(false);  // 中间结果不需要梯度
         Variable weightVar = new Variable(weightReshaped.transpose());
+        weightVar.setRequireGrad(false);  // 这个临时变量不需要梯度
         Variable output = im2colVar.matMul(weightVar);
 
         // 添加偏置
@@ -232,21 +233,12 @@ public class Conv2d extends Module {
 
     /**
      * 添加偏置
+     * <p>
+     * 使用Variable层级的加法操作
      */
     private Variable addBias(Variable output) {
-        NdArray biasData = bias.data();
-        NdArray outputData = output.getValue();
-
-        float[][] outputMatrix = outputData.getMatrix();
-        float[] biasArray = biasData.getArray();
-
-        for (int i = 0; i < outputMatrix.length; i++) {
-            for (int j = 0; j < outputMatrix[i].length; j++) {
-                outputMatrix[i][j] += biasArray[j];
-            }
-        }
-
-        return new Variable(NdArray.of(outputMatrix));
+        // bias是Parameter，直接作为Variable参与运算
+        return output.add(bias);
     }
 
     public int getInChannels() {

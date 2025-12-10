@@ -7,8 +7,6 @@ import io.leavesfly.tinyai.nnet.v1.Block;
 import io.leavesfly.tinyai.nnet.v1.layer.activate.ReLuLayer;
 import io.leavesfly.tinyai.nnet.v1.layer.activate.SigmoidLayer;
 import io.leavesfly.tinyai.nnet.v1.layer.dnn.LinearLayer;
-// import io.leavesfly.tinyai.nnet.layer.norm.DropoutLayer; // 暂时不可用
-
 /**
  * 自我反思模块Block - DeepSeek R1的反思和质量评估组件
  * <p>

@@ -69,26 +69,38 @@ public class Dropout extends Module {
             return x;
         }
 
-        // 生成dropout mask
-        NdArray mask = generateMask(x.getValue());
+        // 生成dropout mask（使用Variable的形状属性）
+        Variable mask = generateMask(x);
 
         // 应用mask并缩放（inverted dropout）
-        Variable masked = x.mul(new Variable(mask));
-        return masked.mul(new Variable(NdArray.of(1.0f / (1 - p))));
+        // 完全停留在Variable层面
+        Variable masked = x.mul(mask);
+        
+        float scale = 1.0f / (1 - p);
+        Variable scaleVar = new Variable(scale);
+        scaleVar.setRequireGrad(false);
+        return masked.mul(scaleVar);
     }
 
     /**
      * 生成dropout mask
+     * <p>
+     * 改进后：直接接收Variable，利用Variable的shape属性
      *
-     * @param input 输入张量
-     * @return mask张量（0或1）
+     * @param input 输入Variable
+     * @return mask Variable（0或1）
      */
-    private NdArray generateMask(NdArray input) {
-        float[] maskData = new float[input.getShape().size()];
+    private Variable generateMask(Variable input) {
+        // 使用Variable的形状属性，不需要getValue()
+        int totalElements = input.numel();
+        float[] maskData = new float[totalElements];
         for (int i = 0; i < maskData.length; i++) {
             maskData[i] = random.nextFloat() > p ? 1.0f : 0.0f;
         }
-        return NdArray.of(maskData, input.getShape());
+        NdArray maskArray = NdArray.of(maskData, input.getShape());
+        Variable maskVar = new Variable(maskArray);
+        maskVar.setRequireGrad(false);  // mask不需要梯度
+        return maskVar;
     }
 
     /**

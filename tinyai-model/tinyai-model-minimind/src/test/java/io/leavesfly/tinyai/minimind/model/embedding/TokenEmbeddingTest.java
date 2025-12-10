@@ -3,6 +3,7 @@ package io.leavesfly.tinyai.minimind.model.embedding;
 import io.leavesfly.tinyai.func.Variable;
 import io.leavesfly.tinyai.ndarr.NdArray;
 import io.leavesfly.tinyai.ndarr.Shape;
+import io.leavesfly.tinyai.nnet.v2.util.GradientChecker;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
 
@@ -108,5 +109,21 @@ public class TokenEmbeddingTest {
             }
         }
         assertTrue(different, "不同token的嵌入应不同");
+    }
+
+    @Test
+    public void testTokenEmbeddingGradientCheck() {
+        TokenEmbedding embedding = new TokenEmbedding(vocabSize, embedDim);
+        
+        // 创建输入 (batch=2, seq_len=5)
+        float[] data = new float[]{
+            1, 2, 3, 4, 5,
+            6, 7, 8, 9, 10
+        };
+        NdArray tokenIds = NdArray.of(data, Shape.of(2, 5));
+        Variable input = new Variable(tokenIds);
+        
+        // 使用 GradientChecker 检查计算图连通性
+        GradientChecker.checkGraphConnectivity(embedding, input);
     }
 }

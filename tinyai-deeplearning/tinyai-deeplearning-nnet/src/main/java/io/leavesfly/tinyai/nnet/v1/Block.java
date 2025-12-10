@@ -146,15 +146,7 @@ public abstract class Block extends LayerAble {
     }
 
 
-    @Override
-    public NdArray forward(NdArray... inputs) {
-        return null;
-    }
 
-    @Override
-    public List<NdArray> backward(NdArray yGrad) {
-        return null;
-    }
 
 
 }

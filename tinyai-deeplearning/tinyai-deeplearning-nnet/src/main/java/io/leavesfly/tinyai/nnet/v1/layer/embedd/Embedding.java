@@ -69,6 +69,12 @@ public class Embedding extends Layer {
         // Embedding层不需要额外的初始化
     }
 
+    @Override
+    public Variable layerForward(Variable... inputs) {
+        //todo
+        return null;
+    }
+
     /**
      * 层的前向传播计算
      * <p>
@@ -78,84 +84,6 @@ public class Embedding extends Layer {
      * @return 前向传播结果变量
      */
 
-    private Variable layerForward0(Variable... inputs) {
-        Variable input = inputs[0];
-        NdArray inputValue = input.getValue();
-
-        // 处理不同形状的输入
-        if (inputValue.getShape().getDimNum() == 1) {
-            // 一维输入 (序列长度,)
-            int[] slices = NdArrayUtil.toInt(inputValue.getMatrix()[0]);
-            return wIn.getItem(slices, null);
-        } else if (inputValue.getShape().getDimNum() == 2) {
-            // 二维输入 (batch_size, sequence_length)
-            int batchSize = inputValue.getShape().getRow();
-            int seqLength = inputValue.getShape().getColumn();
-
-            // 创建结果数组: (batch_size, sequence_length, embedding_dim)
-            NdArray result = NdArray.zeros(Shape.of(batchSize, seqLength, embedSize));
-
-            // 为每个样本处理嵌入
-            for (int i = 0; i < batchSize; i++) {
-                int[] slices = NdArrayUtil.toInt(inputValue.getMatrix()[i]);
-                Variable embeddedSample = wIn.getItem(slices, null);
-                // 将嵌入结果复制到结果数组中
-                for (int j = 0; j < seqLength; j++) {
-                    for (int k = 0; k < embedSize; k++) {
-                        result.set(embeddedSample.getValue().get(j, k), i, j, k);
-                    }
-                }
-            }
-
-            // 如果序列长度为1，重新形状为 (batch_size, embedding_dim)
-            if (seqLength == 1) {
-                result = result.reshape(Shape.of(batchSize, embedSize));
-            }
-
-            return new Variable(result);
-        } else {
-            throw new IllegalArgumentException("Embedding层不支持该输入形状: " + inputValue.getShape());
-        }
-    }
-
-    /**
-     * NdArray前向传播计算（未使用）
-     *
-     * @param inputs 输入的NdArray数组
-     * @return 前向传播结果NdArray
-     */
-    @Override
-    public NdArray forward(NdArray... inputs) {
-        // Embedding层主要通过layerForward方法处理Variable输入
-        return layerForward0(new Variable(inputs[0])).getValue();
-    }
-
-    /**
-     * 反向传播计算梯度
-     * <p>
-     * 对于Embedding层，梯度通过索引位置累加到权重矩阵对应位置
-     *
-     * @param yGrad 输出变量的梯度
-     * @return 输入变量的梯度列表
-     */
-    @Override
-    public List<NdArray> backward(NdArray yGrad) {
-        // Embedding层的输入是离散索引，不需要计算输入的梯度
-        // 但需要累积输出梯度到权重矩阵的对应位置
-        return Arrays.asList(NdArray.zeros(inputShape)); // 输入梯度为0
-    }
-
-    /**
-     * 获取所需输入参数个数
-     * <p>
-     * Embedding层需要一个输入参数：词汇索引。
-     *
-     * @return 输入参数个数，固定为1
-     */
-    @Override
-    public int requireInputNum() {
-        return 1;
-    }
 
     /**
      * 获取词汇表大小

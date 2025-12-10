@@ -3,8 +3,10 @@ package io.leavesfly.tinyai.nnet.v1;
 
 import io.leavesfly.tinyai.func.Function;
 import io.leavesfly.tinyai.func.Variable;
+import io.leavesfly.tinyai.ndarr.NdArray;
 import io.leavesfly.tinyai.ndarr.Shape;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -65,10 +67,7 @@ public abstract class LayerAble extends Function {
      * @param inputs 输入变量数组
      * @return 前向传播结果变量
      */
-    public Variable layerForward(Variable... inputs) {
-        return call(inputs);
-
-    }
+    public abstract Variable layerForward(Variable... inputs);
 
 
     /**
@@ -156,4 +155,14 @@ public abstract class LayerAble extends Function {
         this.alreadyInit = alreadyInit;
     }
 
+
+    @Override
+    public NdArray forward(NdArray... inputs) {
+        return null;
+    }
+
+    @Override
+    public List<NdArray> backward(NdArray yGrad) {
+        return null;
+    }
 }
