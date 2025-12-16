@@ -303,7 +303,7 @@ public class DemoTrainingStages {
 
         // 3. 训练配置
         MiniMindConfig config = model.getConfig();
-        float learningRate = 5e-4f;
+        float learningRate = 1e-3f;
         int epochs = 2;
         int logInterval = 10;
         
