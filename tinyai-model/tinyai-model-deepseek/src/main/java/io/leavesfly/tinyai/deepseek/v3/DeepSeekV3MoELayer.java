@@ -122,11 +122,7 @@ public class DeepSeekV3MoELayer extends Module {
      * @return MoE输出结果
      */
     public MoEOutput computeMoE(Variable input, TaskType taskType) {
-        NdArray inputArray = input.getValue();
-        int batchSize = inputArray.getShape().getDimension(0);
-        int seqLen = inputArray.getShape().getDimension(1);
-        int nEmbd = inputArray.getShape().getDimension(2);
-        
+
         // 1. 计算门控logits: [batch_size, seq_len, numExperts]
         Variable gatingLogits = gatingNetwork.forward(input);
         
