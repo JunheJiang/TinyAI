@@ -290,6 +290,64 @@ sequenceDiagram
 - `jfreechart` - 图表可视化库，用于训练过程监控
 - `junit` - 单元测试框架
 
+## 📚 演示代码 (Demo)
+
+本模块提供了一系列精心设计的演示程序,帮助您快速上手强化学习:
+
+### 演示代码清单
+
+| 演示代码 | 难度 | 时长 | 说明 |
+|---------|------|------|------|
+| **QuickStartDemo** | ⭐ | 3分钟 | 最简单的入门示例,3分钟了解强化学习 |
+| **BasicConceptsDemo** | ⭐⭐ | 10分钟 | 详解状态、动作、奖励、策略、价值函数 |
+| **BanditAlgorithmsDemo** | ⭐⭐ | 15分钟 | ε-贪心、UCB、汤普森采样算法对比 |
+| **DQNCartPoleDemo** | ⭐⭐⭐ | 20分钟 | DQN完整训练流程,解决CartPole问题 |
+| **CustomDevelopmentDemo** | ⭐⭐⭐⭐ | 30分钟 | 自定义环境和智能体,扩展框架 |
+
+### 快速开始
+
+```bash
+# 1. 快速入门 (推荐第一个运行)
+mvn exec:java -Dexec.mainClass="io.leavesfly.tinyai.rl.demo.QuickStartDemo" \
+  -pl tinyai-deeplearning-rl
+
+# 2. 核心概念
+mvn exec:java -Dexec.mainClass="io.leavesfly.tinyai.rl.demo.BasicConceptsDemo" \
+  -pl tinyai-deeplearning-rl
+
+# 3. 算法对比
+mvn exec:java -Dexec.mainClass="io.leavesfly.tinyai.rl.demo.BanditAlgorithmsDemo" \
+  -pl tinyai-deeplearning-rl
+
+# 4. DQN实战
+mvn exec:java -Dexec.mainClass="io.leavesfly.tinyai.rl.demo.DQNCartPoleDemo" \
+  -pl tinyai-deeplearning-rl
+
+# 5. 自定义开发
+mvn exec:java -Dexec.mainClass="io.leavesfly.tinyai.rl.demo.CustomDevelopmentDemo" \
+  -pl tinyai-deeplearning-rl
+```
+
+### 学习路径
+
+**零基础用户 (约30分钟):**
+1. QuickStartDemo → 理解强化学习基本流程
+2. BasicConceptsDemo → 掌握核心概念
+3. BanditAlgorithmsDemo → 学习简单算法
+4. DQNCartPoleDemo → 尝试深度强化学习
+
+**有基础用户 (约1小时):**
+1. BanditAlgorithmsDemo → 算法对比分析
+2. DQNCartPoleDemo → DQN深入学习
+3. CustomDevelopmentDemo → 自定义开发
+4. 参考 `tinyai-deeplearning-case` 中的完整案例
+
+**开发者:**
+- 直接查看 CustomDevelopmentDemo 了解扩展方法
+- 参考 `src/main/java/io/leavesfly/tinyai/rl/demo/README.java` 获取完整文档
+
+---
+
 ## 使用示例
 
 ### DQN算法完整示例
