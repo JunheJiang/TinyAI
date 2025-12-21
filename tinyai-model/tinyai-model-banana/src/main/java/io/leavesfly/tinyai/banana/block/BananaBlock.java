@@ -2,10 +2,13 @@ package io.leavesfly.tinyai.banana.block;
 
 import io.leavesfly.tinyai.banana.config.BananaConfig;
 import io.leavesfly.tinyai.banana.config.TaskType;
+import io.leavesfly.tinyai.banana.decoder.ImageDecoder;
 import io.leavesfly.tinyai.banana.encoder.ImageEncoder;
 import io.leavesfly.tinyai.banana.encoder.TextEncoder;
 import io.leavesfly.tinyai.banana.fusion.MultiModalFusion;
 import io.leavesfly.tinyai.func.Variable;
+import io.leavesfly.tinyai.ndarr.NdArray;
+import io.leavesfly.tinyai.ndarr.Shape;
 import io.leavesfly.tinyai.nnet.v2.core.Module;
 import io.leavesfly.tinyai.nnet.v2.layer.dnn.Linear;
 import io.leavesfly.tinyai.nnet.v2.layer.norm.LayerNorm;
@@ -34,6 +37,7 @@ public class BananaBlock extends Module {
     private TextEncoder textEncoder;        // 文本编码器
     private ImageEncoder imageEncoder;      // 图像编码器
     private MultiModalFusion fusionLayer;   // 多模态融合层
+    private ImageDecoder imageDecoder;      // 图像解码器
     
     // 基础组件
     private LayerNorm finalLayerNorm;
@@ -68,6 +72,10 @@ public class BananaBlock extends Module {
             fusionLayer = new MultiModalFusion(name + "_fusion", config);
             registerModule("fusion", fusionLayer);
         }
+        
+        // 初始化图像解码器
+        imageDecoder = new ImageDecoder(name + "_image_decoder", config);
+        registerModule("image_decoder", imageDecoder);
         
         // 初始化最终LayerNorm
         finalLayerNorm = new LayerNorm(
@@ -208,6 +216,68 @@ public class BananaBlock extends Module {
     }
     
     /**
+     * 文本到图像生成
+     * 
+     * @param textTokenIds 文本描述token IDs [batch, text_len]
+     * @return 生成的图像 [batch, 3, image_size, image_size]
+     */
+    public Variable textToImage(Variable textTokenIds) {
+        // 1. 编码文本
+        Variable textFeatures = forwardText(textTokenIds);
+        
+        // 2. 融合（使用文本特征作为自注意力）
+        Variable fusedFeatures = fusionLayer.forward(textFeatures, textFeatures);
+        
+        // 3. 将融合后的文本特征扩展到patch数量
+        // [batch, text_len, hidden_size] -> [batch, num_patches, hidden_size]
+        fusedFeatures = expandToPatches(fusedFeatures);
+        
+        // 4. 解码为图像
+        Variable generatedImage = imageDecoder.forward(fusedFeatures, fusedFeatures);
+        
+        return generatedImage;
+    }
+    
+    /**
+     * 将文本特征扩展到patch数量
+     * 使用平均池化或重复策略
+     * 
+     * @param textFeatures 文本特征 [batch, text_len, hidden_size]
+     * @return 扩展后的特征 [batch, num_patches, hidden_size]
+     */
+    private Variable expandToPatches(Variable textFeatures) {
+        int[] shape = textFeatures.getValue().getShape().getShapeDims();
+        int batchSize = shape[0];
+        int textLen = shape[1];
+        int hiddenSize = shape[2];
+        
+        int numPatches = config.getNumPatches();
+        
+        // 简化实现：重复最后一个文本token的特征
+        // 更复杂的实现可以使用线性插值或可学习的投影层
+        NdArray inputData = textFeatures.getValue();
+        float[] outputData = new float[batchSize * numPatches * hiddenSize];
+        
+        for (int b = 0; b < batchSize; b++) {
+            // 获取最后一个文本token的特征
+            for (int p = 0; p < numPatches; p++) {
+                for (int h = 0; h < hiddenSize; h++) {
+                    // 使用最后一个token的特征
+                    float value = inputData.get(b, textLen - 1, h);
+                    int outIdx = (b * numPatches + p) * hiddenSize + h;
+                    outputData[outIdx] = value;
+                }
+            }
+        }
+        
+        NdArray outputArray = NdArray.of(
+            outputData, 
+            Shape.of(batchSize, numPatches, hiddenSize)
+        );
+        return new Variable(outputArray);
+    }
+    
+    /**
      * 打印架构信息
      */
     public void printArchitecture() {
@@ -221,6 +291,7 @@ public class BananaBlock extends Module {
         System.out.println("  图像编码器: ✓ " + imageEncoder);
         System.out.println("  多模态融合: " + 
             (fusionLayer != null ? "✓ " + fusionLayer : "未启用"));
+        System.out.println("  图像解码器: ✓ " + imageDecoder);
         System.out.println("  最终LayerNorm: ✓");
         System.out.println("  输出投影层: ✓");
         System.out.println("=".repeat(80));
@@ -250,6 +321,10 @@ public class BananaBlock extends Module {
     
     public Linear getOutputProjection() {
         return outputProjection;
+    }
+    
+    public ImageDecoder getImageDecoder() {
+        return imageDecoder;
     }
     
     // ==================== 内部结果类 ====================

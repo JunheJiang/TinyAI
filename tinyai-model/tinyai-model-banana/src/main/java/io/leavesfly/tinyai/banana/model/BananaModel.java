@@ -135,8 +135,7 @@ public class BananaModel extends Model {
      * @return 生成的图像 [batch, channels, height, width]
      */
     public Variable generateImage(Variable textTokenIds) {
-        // TODO: 实现文本到图像生成
-        throw new UnsupportedOperationException("文本到图像生成尚未实现");
+        return bananaBlock.textToImage(textTokenIds);
     }
     
     /**

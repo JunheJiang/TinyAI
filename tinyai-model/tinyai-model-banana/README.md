@@ -19,9 +19,9 @@
 
 | 特性类别 | 功能说明 |
 |---------|----------|
-| **模型架构** | Vision Transformer · 跨模态注意力 · Patch嵌入 · 2D位置编码 |
+| **模型架构** | Vision Transformer · 跨模态注意力 · Patch嵌入 · 2D位置编码 · 图像解码器 |
 | **编码能力** | 文本编码器 · 图像编码器 · 多模态融合 |
-| **生成能力** | 文本到图像 · 图像编辑 · 图像理解 |
+| **生成能力** | 文本到图像✓ · 图像编辑(待实现) · 图像理解(待实现) |
 | **工程特性** | 纯 Java 实现 · V2 组件架构 · 复用Conv2D算子 |
 
 ## 🏗️ 架构设计
@@ -62,9 +62,10 @@ tinyai-model-banana/
 │   │   ├── MultiModalAttention.java        # 多模态注意力
 │   │   └── CrossModalAttention.java        # 跨模态注意力
 │   │
-│   ├── decoder/                         # 解码器模块(待实现)
-│   │   ├── ImageDecoder.java               # 图像解码器
-│   │   └── ImageTokenizer.java             # 图像Tokenizer
+│   ├── decoder/                         # 解码器模块 ✓
+│   │   ├── ImageDecoder.java               # 图像解码器 ✓
+│   │   ├── UpsampleBlock.java              # 上采样模块 ✓
+│   │   └── PixelProjection.java            # 像素投影层 ✓
 │   │
 │   ├── block/                           # 主体块
 │   │   └── BananaBlock.java                # 模型主体
@@ -81,7 +82,8 @@ tinyai-model-banana/
 │   │       └── TrainDemo.java              # 训练演示
 │   │
 │   └── demo/                            # 演示程序
-│       └── BananaDemo.java                 # 推理演示
+│       ├── BananaDemo.java                 # 推理演示
+│       └── TextToImageDemo.java            # 文本生成图像演示 ✓
 │
 └── README.md                             # 本文档
 ```
@@ -174,6 +176,26 @@ Variable fusedResult = model.getBananaBlock().forwardMultiModal(
 );
 
 System.out.println("融合结果: " + fusedResult.getValue().getShape());
+```
+
+### 5. 文本生成图像 ✓
+
+```java
+// 准备文本输入 (模拟 token IDs)
+float[] tokenData = new float[2 * 32];  // 2个样本，长度32
+for (int i = 0; i < tokenData.length; i++) {
+    tokenData[i] = (float) (Math.random() * 1000);
+}
+
+NdArray textTokens = NdArray.of(tokenData, Shape.of(2, 32));
+Variable textInput = new Variable(textTokens);
+
+// 生成图像
+Variable generatedImage = model.generateImage(textInput);
+System.out.println("生成图像: " + generatedImage.getValue().getShape());
+// 输出: [2, 3, 256, 256]  (2张RGB图像，256x256)
+
+// 像素值处于 [-1, 1] 范围，可以转换为 [0, 255] 保存
 ```
 
 ## 🎯 训练流程
