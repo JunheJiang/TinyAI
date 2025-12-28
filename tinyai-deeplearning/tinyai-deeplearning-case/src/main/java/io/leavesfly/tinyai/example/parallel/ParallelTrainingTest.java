@@ -1,15 +1,16 @@
 package io.leavesfly.tinyai.example.parallel;
 
-import io.leavesfly.tinyai.ml.Model;
+import io.leavesfly.tinyai.ml.model.Model;
 import io.leavesfly.tinyai.ml.dataset.simple.SpiralDateSet;
 import io.leavesfly.tinyai.ml.evaluator.AccuracyEval;
 import io.leavesfly.tinyai.ml.loss.Classify;
 import io.leavesfly.tinyai.ml.loss.SoftmaxCrossEntropy;
 import io.leavesfly.tinyai.ml.optimize.Adam;
+import io.leavesfly.tinyai.ml.training.Trainer;
+import io.leavesfly.tinyai.ml.visual.Monitor;
 import io.leavesfly.tinyai.nnet.v2.container.Sequential;
 import io.leavesfly.tinyai.nnet.v2.layer.dnn.Linear;
 import io.leavesfly.tinyai.nnet.v2.layer.activation.ReLU;
-import io.leavesfly.tinyai.util.Config;
 
 /**
  * 并行训练测试示例
@@ -64,7 +65,7 @@ public class ParallelTrainingTest {
      * @param name 模型名称
      * @return 创建的MLP模型
      */
-    private static io.leavesfly.tinyai.ml.Model createModel(String name) {
+    private static Model createModel(String name) {
         Sequential mlpBlock = new Sequential(name);
         mlpBlock.add(new Linear("fc1", 2, 16, true));
         mlpBlock.add(new ReLU("relu1"));
@@ -72,7 +73,7 @@ public class ParallelTrainingTest {
         mlpBlock.add(new ReLU("relu2"));
         mlpBlock.add(new Linear("fc3", 16, 3, true));
 
-        return new io.leavesfly.tinyai.ml.Model(name, mlpBlock);
+        return new Model(name, mlpBlock);
     }
 
     /**
@@ -90,12 +91,12 @@ public class ParallelTrainingTest {
                                              int maxEpoch, int threadCount) {
         long startTime = System.currentTimeMillis();
 
-        io.leavesfly.tinyai.ml.Monitor monitor = new io.leavesfly.tinyai.ml.Monitor();
+        Monitor monitor = new Monitor();
         Classify classify = new Classify();
         AccuracyEval evaluator = new AccuracyEval(classify, model, dataSet);
 
         // 创建并行训练器
-        io.leavesfly.tinyai.ml.Trainer trainer = new io.leavesfly.tinyai.ml.Trainer(maxEpoch, monitor, evaluator, true, threadCount);
+        Trainer trainer = new Trainer(maxEpoch, monitor, evaluator, true, threadCount);
         trainer.init(dataSet, model, loss, optimizer);
 
         System.out.println("并行训练配置: 线程数=" + trainer.getParallelThreadCount() +

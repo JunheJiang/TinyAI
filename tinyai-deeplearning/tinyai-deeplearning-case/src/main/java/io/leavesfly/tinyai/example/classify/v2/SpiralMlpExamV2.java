@@ -1,8 +1,6 @@
 package io.leavesfly.tinyai.example.classify.v2;
 
 import io.leavesfly.tinyai.func.Variable;
-import io.leavesfly.tinyai.ml.Model;
-import io.leavesfly.tinyai.ml.Plot;
 import io.leavesfly.tinyai.ml.dataset.ArrayDataset;
 import io.leavesfly.tinyai.ml.dataset.Batch;
 import io.leavesfly.tinyai.ml.dataset.simple.SpiralDateSet;
@@ -11,8 +9,10 @@ import io.leavesfly.tinyai.ml.evaluator.Evaluator;
 import io.leavesfly.tinyai.ml.loss.Classify;
 import io.leavesfly.tinyai.ml.loss.Loss;
 import io.leavesfly.tinyai.ml.loss.SoftmaxCrossEntropy;
+import io.leavesfly.tinyai.ml.model.Model;
 import io.leavesfly.tinyai.ml.optimize.Optimizer;
 import io.leavesfly.tinyai.ml.optimize.SGD;
+import io.leavesfly.tinyai.ml.visual.Plot;
 import io.leavesfly.tinyai.ndarr.NdArray;
 import io.leavesfly.tinyai.ndarr.Shape;
 import io.leavesfly.tinyai.nnet.v2.container.Sequential;

@@ -14,7 +14,7 @@
 
     <artifactId>tinyai-embodied-robot</artifactId>
     <packaging>jar</packaging>
-    <name>tinyai-agent-embodied-robot</name>
+    <name>tinyai-embodied-robot</name>
     <description>TinyAI 具身智能扫地机器人模块 - 端到端学习应用示例</description>
 
     <dependencies>

@@ -1,7 +1,7 @@
 package io.leavesfly.tinyai.minimind.model;
 
 import io.leavesfly.tinyai.func.Variable;
-import io.leavesfly.tinyai.ml.Model;
+import io.leavesfly.tinyai.ml.model.Model;
 import io.leavesfly.tinyai.minimind.model.attention.KVCache;
 import io.leavesfly.tinyai.minimind.model.attention.MultiHeadAttention;
 import io.leavesfly.tinyai.minimind.model.transformer.MiniMindTransformerLayer;

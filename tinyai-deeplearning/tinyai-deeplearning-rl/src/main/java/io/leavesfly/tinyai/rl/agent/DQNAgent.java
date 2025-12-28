@@ -1,7 +1,7 @@
 package io.leavesfly.tinyai.rl.agent;
 
 import io.leavesfly.tinyai.func.Variable;
-import io.leavesfly.tinyai.ml.Model;
+import io.leavesfly.tinyai.ml.model.Model;
 import io.leavesfly.tinyai.ml.loss.Loss;
 import io.leavesfly.tinyai.ml.loss.MeanSquaredLoss;
 import io.leavesfly.tinyai.ml.optimize.Adam;
@@ -15,7 +15,6 @@ import io.leavesfly.tinyai.ndarr.Shape;
 import io.leavesfly.tinyai.nnet.v2.container.Sequential;
 import io.leavesfly.tinyai.nnet.v2.layer.dnn.Linear;
 import io.leavesfly.tinyai.nnet.v2.layer.activation.ReLU;
-import io.leavesfly.tinyai.util.Config;
 
 /**
  * Deep Q-Network (DQN) 智能体实现

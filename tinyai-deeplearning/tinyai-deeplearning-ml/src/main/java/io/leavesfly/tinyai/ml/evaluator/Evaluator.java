@@ -1,6 +1,6 @@
 package io.leavesfly.tinyai.ml.evaluator;
 
-import io.leavesfly.tinyai.ml.Model;
+import io.leavesfly.tinyai.ml.model.Model;
 import io.leavesfly.tinyai.ml.dataset.DataSet;
 
 /**

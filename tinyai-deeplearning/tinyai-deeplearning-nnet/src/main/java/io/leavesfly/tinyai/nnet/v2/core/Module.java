@@ -24,6 +24,83 @@ import java.util.function.Consumer;
 public abstract class Module extends Function implements Serializable {
 
     private static final long serialVersionUID = 1L;
+    
+    // ==================== Hook接口定义 ====================
+    
+    /**
+     * 前向传播钩子接口
+     * <p>
+     * 在模块前向传播之前或之后调用。
+     * 可以用于特征提取、监控、调试等。
+     */
+    @FunctionalInterface
+    public interface ForwardPreHook {
+        /**
+         * 前向传播前调用
+         *
+         * @param module 触发hook的模块
+         * @param input  输入变量
+         * @return 处理后的输入（可以修改输入）
+         */
+        Variable apply(Module module, Variable input);
+    }
+    
+    /**
+     * 前向传播后钩子接口
+     */
+    @FunctionalInterface
+    public interface ForwardHook {
+        /**
+         * 前向传播后调用
+         *
+         * @param module 触发hook的模块
+         * @param input  输入变量
+         * @param output 输出变量
+         * @return 处理后的输出（可以修改输出）
+         */
+        Variable apply(Module module, Variable input, Variable output);
+    }
+    
+    /**
+     * 反向传播钩子接口
+     * <p>
+     * 在模块反向传播时调用。
+     * 常用于梯度裁剪、梯度监控等。
+     */
+    @FunctionalInterface
+    public interface BackwardHook {
+        /**
+         * 反向传播时调用
+         *
+         * @param module      触发hook的模块
+         * @param gradInput   输入梯度
+         * @param gradOutput  输出梯度
+         * @return 处理后的输入梯度（可以修改梯度）
+         */
+        Variable apply(Module module, Variable gradInput, Variable gradOutput);
+    }
+    
+    /**
+     * Hook句柄类 - 用于移除已注册的hook
+     */
+    public static class RemovableHandle {
+        private final List<?> hookList;
+        private final Object hook;
+        
+        public RemovableHandle(List<?> hookList, Object hook) {
+            this.hookList = hookList;
+            this.hook = hook;
+        }
+        
+        /**
+         * 移除hook
+         */
+        public void remove() {
+            hookList.remove(hook);
+        }
+    }
+    
+    // ==================== 原有字段定义 ====================
 
     /**
      * 模块名称
@@ -63,6 +140,21 @@ public abstract class Module extends Function implements Serializable {
      * 是否已初始化
      */
     protected boolean _initialized = false;
+    
+    /**
+     * 前向传播前钩子列表
+     */
+    protected transient List<ForwardPreHook> _forward_pre_hooks;
+    
+    /**
+     * 前向传播后钩子列表
+     */
+    protected transient List<ForwardHook> _forward_hooks;
+    
+    /**
+     * 反向传播钩子列表
+     */
+    protected transient List<BackwardHook> _backward_hooks;
 
     /**
      * 默认构造函数
@@ -81,6 +173,9 @@ public abstract class Module extends Function implements Serializable {
         this._parameters = new LinkedHashMap<>();
         this._buffers = new LinkedHashMap<>();
         this._modules = new LinkedHashMap<>();
+        this._forward_pre_hooks = new ArrayList<>();
+        this._forward_hooks = new ArrayList<>();
+        this._backward_hooks = new ArrayList<>();
     }
 
     /**
@@ -177,6 +272,27 @@ public abstract class Module extends Function implements Serializable {
      */
     public Module getModule(String moduleName) {
         return _modules.get(moduleName);
+    }
+
+    /**
+     * 获取所有参数（PyTorch风格API）
+     * <p>
+     * 类似PyTorch的parameters()方法,返回所有参数的集合。
+     *
+     * @param recurse 是否递归遍历子模块
+     * @return 参数集合
+     */
+    public Collection<Parameter> parameters(boolean recurse) {
+        return namedParameters("", recurse).values();
+    }
+
+    /**
+     * 获取所有参数（默认递归,PyTorch风格API）
+     *
+     * @return 参数集合
+     */
+    public Collection<Parameter> parameters() {
+        return parameters(true);
     }
 
     /**
@@ -792,6 +908,201 @@ public abstract class Module extends Function implements Serializable {
      */
     public Module trainAndUnfreeze() {
         return train().unfreeze();
+    }
+
+    /* ===== PyTorch风格API增强 ===== */
+
+    /**
+     * 获取模型状态字典（PyTorch风格别名）
+     * <p>
+     * 等价于stateDict()，与PyTorch的state_dict()保持一致
+     *
+     * @return 完整路径到张量数据的映射
+     */
+    public Map<String, NdArray> state_dict() {
+        return stateDict();
+    }
+
+    /**
+     * 加载模型状态字典（PyTorch风格别名）
+     * <p>
+     * 等价于loadStateDict()，与PyTorch的load_state_dict()保持一致
+     *
+     * @param state_dict 状态字典
+     * @param strict     是否严格匹配
+     */
+    public void load_state_dict(Map<String, NdArray> state_dict, boolean strict) {
+        loadStateDict(state_dict, strict);
+    }
+
+    /**
+     * 加载模型状态字典（默认严格模式,PyTorch风格别名）
+     *
+     * @param state_dict 状态字典
+     */
+    public void load_state_dict(Map<String, NdArray> state_dict) {
+        loadStateDict(state_dict, true);
+    }
+
+    /**
+     * 设备转移（预留接口,未来支持GPU）
+     * <p>
+     * 类似PyTorch的to(device)方法，用于将模型转移到指定设备。
+     * 当前版本仅支持CPU，该方法为预留接口。
+     *
+     * @param device 设备类型（"cpu", "cuda", "mps"等）
+     * @return 当前模块（支持链式调用）
+     */
+    public Module to(String device) {
+        // 当前TinyAI仅支持CPU，这里为预留接口
+        if (!"cpu".equalsIgnoreCase(device)) {
+            System.err.println("Warning: TinyAI currently only supports CPU. Device '" + device + "' is not supported yet.");
+        }
+        // 未来可以添加GPU设备转移逻辑
+        return this;
+    }
+    
+    /* ===== Hooks机制 ===== */
+    
+    /**
+     * 注册前向传播前钩子
+     * <p>
+     * 在forward()方法执行前调用，可以修改输入。
+     *
+     * @param hook 前向传播前钩子
+     * @return hook句柄，用于移除hook
+     */
+    public RemovableHandle register_forward_pre_hook(ForwardPreHook hook) {
+        if (_forward_pre_hooks == null) {
+            _forward_pre_hooks = new ArrayList<>();
+        }
+        _forward_pre_hooks.add(hook);
+        return new RemovableHandle(_forward_pre_hooks, hook);
+    }
+    
+    /**
+     * 注册前向传播后钩子
+     * <p>
+     * 在forward()方法执行后调用，可以修改输出或提取特征。
+     *
+     * @param hook 前向传播后钩子
+     * @return hook句柄，用于移除hook
+     */
+    public RemovableHandle register_forward_hook(ForwardHook hook) {
+        if (_forward_hooks == null) {
+            _forward_hooks = new ArrayList<>();
+        }
+        _forward_hooks.add(hook);
+        return new RemovableHandle(_forward_hooks, hook);
+    }
+    
+    /**
+     * 注册反向传播钩子
+     * <p>
+     * 在反向传播时调用，常用于梯度裁剪、梯度监控等。
+     *
+     * @param hook 反向传播钩子
+     * @return hook句柄，用于移除hook
+     */
+    public RemovableHandle register_backward_hook(BackwardHook hook) {
+        if (_backward_hooks == null) {
+            _backward_hooks = new ArrayList<>();
+        }
+        _backward_hooks.add(hook);
+        return new RemovableHandle(_backward_hooks, hook);
+    }
+    
+    /**
+     * 执行前向传播前钩子
+     *
+     * @param input 输入变量
+     * @return 处理后的输入
+     */
+    protected Variable runForwardPreHooks(Variable input) {
+        if (_forward_pre_hooks != null && !_forward_pre_hooks.isEmpty()) {
+            Variable result = input;
+            for (ForwardPreHook hook : _forward_pre_hooks) {
+                result = hook.apply(this, result);
+            }
+            return result;
+        }
+        return input;
+    }
+    
+    /**
+     * 执行前向传播后钩子
+     *
+     * @param input  输入变量
+     * @param output 输出变量
+     * @return 处理后的输出
+     */
+    protected Variable runForwardHooks(Variable input, Variable output) {
+        if (_forward_hooks != null && !_forward_hooks.isEmpty()) {
+            Variable result = output;
+            for (ForwardHook hook : _forward_hooks) {
+                result = hook.apply(this, input, result);
+            }
+            return result;
+        }
+        return output;
+    }
+    
+    /**
+     * 执行反向传播钩子
+     *
+     * @param gradInput  输入梯度
+     * @param gradOutput 输出梯度
+     * @return 处理后的输入梯度
+     */
+    protected Variable runBackwardHooks(Variable gradInput, Variable gradOutput) {
+        if (_backward_hooks != null && !_backward_hooks.isEmpty()) {
+            Variable result = gradInput;
+            for (BackwardHook hook : _backward_hooks) {
+                result = hook.apply(this, result, gradOutput);
+            }
+            return result;
+        }
+        return gradInput;
+    }
+
+    /**
+     * 获取模块字符串表示（PyTorch风格）
+     * <p>
+     * 与PyTorch的__repr__()类似，生成模块的结构化表示。
+     *
+     * @return 模块的字符串表示
+     */
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(this.getClass().getSimpleName()).append("(");
+        
+        String extra = extraRepr();
+        if (!extra.isEmpty()) {
+            sb.append(extra);
+        }
+        
+        if (!_modules.isEmpty()) {
+            if (!extra.isEmpty()) {
+                sb.append(", ");
+            }
+            sb.append("\n");
+            for (Map.Entry<String, Module> entry : _modules.entrySet()) {
+                if (entry.getValue() != null) {
+                    String childStr = entry.getValue().toString();
+                    String[] lines = childStr.split("\n");
+                    sb.append("  (").append(entry.getKey()).append("): ");
+                    sb.append(lines[0]);
+                    for (int i = 1; i < lines.length; i++) {
+                        sb.append("\n  ").append(lines[i]);
+                    }
+                    sb.append("\n");
+                }
+            }
+        }
+        
+        sb.append(")");
+        return sb.toString();
     }
 
 }

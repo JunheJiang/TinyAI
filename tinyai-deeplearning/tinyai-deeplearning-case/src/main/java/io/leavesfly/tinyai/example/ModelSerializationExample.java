@@ -1,17 +1,15 @@
 package io.leavesfly.tinyai.example;
 
 
-import io.leavesfly.tinyai.ml.Model;
-import io.leavesfly.tinyai.ml.ModelInfo;
-import io.leavesfly.tinyai.ml.ModelInfoExporter;
-import io.leavesfly.tinyai.ml.ParameterManager;
+import io.leavesfly.tinyai.ml.model.Model;
+import io.leavesfly.tinyai.ml.model.ModelInfo;
+import io.leavesfly.tinyai.ml.model.ModelInfoExporter;
+import io.leavesfly.tinyai.ml.model.parameter.ParameterManager;
 import io.leavesfly.tinyai.ndarr.NdArray;
 import io.leavesfly.tinyai.nnet.v2.core.Parameter;
 import io.leavesfly.tinyai.nnet.v2.container.Sequential;
 import io.leavesfly.tinyai.nnet.v2.layer.dnn.Linear;
 import io.leavesfly.tinyai.nnet.v2.layer.activation.ReLU;
-
-import io.leavesfly.tinyai.util.Config;
 
 import java.io.File;
 import java.util.Map;

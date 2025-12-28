@@ -63,6 +63,26 @@ public class Qwen3Config {
     /** 是否绑定词嵌入权重，默认false */
     private boolean tieWordEmbeddings = false;
     
+    // ==================== MoE配置 ====================
+    
+    /** 是否启用MoE架构，默认false */
+    private boolean enableMoE = false;
+    
+    /** 专家数量，默认8个专家 */
+    private int numExperts = 8;
+    
+    /** Top-K选择数量，默认选择2个专家 */
+    private int expertTopK = 2;
+    
+    /** 专家隐藏层倍数（相对于hiddenSize），默认4倍 */
+    private int expertHiddenMultiplier = 4;
+    
+    /** 是否启用负载均衡，默认true */
+    private boolean expertLoadBalance = true;
+    
+    /** 负载损失系数，默认0.01 */
+    private float expertLoadCoef = 0.01f;
+    
     // ==================== 初始化配置 ====================
     
     /** 权重初始化标准差，默认0.02 */
@@ -193,17 +213,27 @@ public class Qwen3Config {
         // RMSNorm1: hiddenSize
         long rmsNorm1 = hiddenSize;
         
-        // MLP: gate_proj + up_proj + down_proj
-        long gateProj = (long) hiddenSize * intermediateSize;
-        long upProj = (long) hiddenSize * intermediateSize;
-        long downProj = (long) intermediateSize * hiddenSize;
-        long mlpParams = gateProj + upProj + downProj;
+        // MLP/MoE参数
+        long ffnParams;
+        if (enableMoE) {
+            // MoE: 门控网络 + numExperts个专家网络
+            long gatingParams = (long) hiddenSize * numExperts;
+            int expertHiddenSize = hiddenSize * expertHiddenMultiplier;
+            long expertParams = (long) (hiddenSize * expertHiddenSize * 2 + expertHiddenSize * hiddenSize);
+            ffnParams = gatingParams + expertParams * numExperts;
+        } else {
+            // 标准MLP: gate_proj + up_proj + down_proj
+            long gateProj = (long) hiddenSize * intermediateSize;
+            long upProj = (long) hiddenSize * intermediateSize;
+            long downProj = (long) intermediateSize * hiddenSize;
+            ffnParams = gateProj + upProj + downProj;
+        }
         
         // RMSNorm2: hiddenSize
         long rmsNorm2 = hiddenSize;
         
         // 每层总参数
-        long paramsPerLayer = attnParams + rmsNorm1 + mlpParams + rmsNorm2;
+        long paramsPerLayer = attnParams + rmsNorm1 + ffnParams + rmsNorm2;
         
         // 所有层
         long allLayers = paramsPerLayer * numHiddenLayers;
@@ -329,6 +359,60 @@ public class Qwen3Config {
     
     public void setInitializerRange(double initializerRange) {
         this.initializerRange = initializerRange;
+    }
+    
+    // ==================== MoE Getter和Setter方法 ====================
+    
+    public boolean isEnableMoE() {
+        return enableMoE;
+    }
+    
+    public void setEnableMoE(boolean enableMoE) {
+        this.enableMoE = enableMoE;
+    }
+    
+    public int getNumExperts() {
+        return numExperts;
+    }
+    
+    public void setNumExperts(int numExperts) {
+        this.numExperts = numExperts;
+    }
+    
+    public int getExpertTopK() {
+        return expertTopK;
+    }
+    
+    public void setExpertTopK(int expertTopK) {
+        this.expertTopK = expertTopK;
+    }
+    
+    public int getExpertHiddenMultiplier() {
+        return expertHiddenMultiplier;
+    }
+    
+    public void setExpertHiddenMultiplier(int expertHiddenMultiplier) {
+        this.expertHiddenMultiplier = expertHiddenMultiplier;
+    }
+    
+    public int getExpertHiddenSize() {
+        return hiddenSize * expertHiddenMultiplier;
+    }
+    
+    public boolean isExpertLoadBalance() {
+        return expertLoadBalance;
+    }
+    
+    public void setExpertLoadBalance(boolean expertLoadBalance) {
+        this.expertLoadBalance = expertLoadBalance;
+    }
+    
+    public float getExpertLoadCoef() {
+        return expertLoadCoef;
+    }
+    
+    public void setExpertLoadCoef(float expertLoadCoef) {
+        this.expertLoadCoef = expertLoadCoef;
     }
     
     @Override

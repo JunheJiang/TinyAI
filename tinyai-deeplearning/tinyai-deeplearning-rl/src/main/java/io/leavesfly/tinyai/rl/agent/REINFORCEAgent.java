@@ -1,7 +1,7 @@
 package io.leavesfly.tinyai.rl.agent;
 
 import io.leavesfly.tinyai.func.Variable;
-import io.leavesfly.tinyai.ml.Model;
+import io.leavesfly.tinyai.ml.model.Model;
 import io.leavesfly.tinyai.ml.optimize.Adam;
 import io.leavesfly.tinyai.ml.optimize.Optimizer;
 import io.leavesfly.tinyai.rl.Agent;

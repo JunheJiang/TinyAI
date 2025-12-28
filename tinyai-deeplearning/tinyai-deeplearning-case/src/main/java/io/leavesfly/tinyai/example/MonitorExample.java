@@ -1,8 +1,8 @@
 package io.leavesfly.tinyai.example;
 
-import io.leavesfly.tinyai.ml.Model;
-import io.leavesfly.tinyai.ml.Monitor;
-import io.leavesfly.tinyai.ml.Trainer;
+import io.leavesfly.tinyai.ml.model.Model;
+import io.leavesfly.tinyai.ml.visual.Monitor;
+import io.leavesfly.tinyai.ml.training.Trainer;
 import io.leavesfly.tinyai.ml.dataset.ArrayDataset;
 import io.leavesfly.tinyai.ml.dataset.simple.SpiralDateSet;
 import io.leavesfly.tinyai.ml.evaluator.AccuracyEval;

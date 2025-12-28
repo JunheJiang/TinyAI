@@ -1,7 +1,7 @@
 package io.leavesfly.tinyai.ml.training;
 
-import io.leavesfly.tinyai.ml.Model;
-import io.leavesfly.tinyai.ml.util.ValidationUtils;
+import io.leavesfly.tinyai.ml.model.Model;
+import io.leavesfly.tinyai.ml.visual.ValidationUtils;
 import io.leavesfly.tinyai.ndarr.NdArray;
 import io.leavesfly.tinyai.nnet.v2.core.Parameter;
 

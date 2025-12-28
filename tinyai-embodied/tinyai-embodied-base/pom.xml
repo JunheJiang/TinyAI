@@ -14,7 +14,7 @@
 
     <artifactId>tinyai-embodied-base</artifactId>
     <packaging>jar</packaging>
-    <name>tinyai-agent-embodied</name>
+    <name>tinyai-embodied-base</name>
     <description>TinyAI 具身智能模块 - 自动驾驶场景的端到端学习</description>
 
     <dependencies>

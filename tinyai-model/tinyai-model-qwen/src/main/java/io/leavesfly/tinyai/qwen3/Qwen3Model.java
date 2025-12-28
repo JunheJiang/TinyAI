@@ -1,7 +1,7 @@
 package io.leavesfly.tinyai.qwen3;
 
 import io.leavesfly.tinyai.func.Variable;
-import io.leavesfly.tinyai.ml.Model;
+import io.leavesfly.tinyai.ml.model.Model;
 import io.leavesfly.tinyai.ndarr.NdArray;
 
 /**

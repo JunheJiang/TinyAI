@@ -1,7 +1,7 @@
 package io.leavesfly.tinyai.ml.scheduler;
 
 import io.leavesfly.tinyai.ml.optimize.Optimizer;
-import io.leavesfly.tinyai.ml.util.ValidationUtils;
+import io.leavesfly.tinyai.ml.visual.ValidationUtils;
 
 /**
  * 阶梯式学习率调度器

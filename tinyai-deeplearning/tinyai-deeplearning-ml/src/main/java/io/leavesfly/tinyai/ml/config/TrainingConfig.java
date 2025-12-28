@@ -1,6 +1,6 @@
 package io.leavesfly.tinyai.ml.config;
 
-import io.leavesfly.tinyai.ml.util.ValidationUtils;
+import io.leavesfly.tinyai.ml.visual.ValidationUtils;
 
 /**
  * 训练配置类

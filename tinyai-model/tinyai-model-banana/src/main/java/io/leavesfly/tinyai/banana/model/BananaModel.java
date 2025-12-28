@@ -4,8 +4,7 @@ import io.leavesfly.tinyai.banana.block.BananaBlock;
 import io.leavesfly.tinyai.banana.config.BananaConfig;
 import io.leavesfly.tinyai.banana.config.TaskType;
 import io.leavesfly.tinyai.func.Variable;
-import io.leavesfly.tinyai.ml.Model;
-import io.leavesfly.tinyai.ndarr.NdArray;
+import io.leavesfly.tinyai.ml.model.Model;
 
 /**
  * Banana多模态图像生成模型

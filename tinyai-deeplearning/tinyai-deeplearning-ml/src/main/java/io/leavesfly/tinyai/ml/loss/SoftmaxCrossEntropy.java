@@ -3,16 +3,49 @@ package io.leavesfly.tinyai.ml.loss;
 import io.leavesfly.tinyai.func.Variable;
 
 /**
- * Softmax交叉熵损失函数
- * 
- * 用于分类任务的损失计算，结合了Softmax激活函数和交叉熵损失。
+ * Softmax交叉熄损失函数
+ * <p>
+ * 用于分类任务的损失计算，结合了Softmax激活函数和交叉熄损失。
+ * 支持PyTorch风格的reduction参数。
  * 
  * @author TinyDL
- * @version 1.0
+ * @version 2.0
  */
 public class SoftmaxCrossEntropy extends Loss {
+    
+    /**
+     * 默认构造函数(使用MEAN归约)
+     */
+    public SoftmaxCrossEntropy() {
+        super(Reduction.MEAN);
+    }
+    
+    /**
+     * 带归约方式的构造函数
+     *
+     * @param reduction 归约方式
+     */
+    public SoftmaxCrossEntropy(Reduction reduction) {
+        super(reduction);
+    }
+    
+    /**
+     * 完整参数构造函数
+     *
+     * @param reduction   归约方式
+     * @param weight      类别权重
+     * @param ignoreIndex 忽略的索引值
+     */
+    public SoftmaxCrossEntropy(Reduction reduction, Variable weight, int ignoreIndex) {
+        super(reduction, weight, ignoreIndex);
+    }
+    
     @Override
     public Variable loss(Variable y, Variable predict) {
-        return predict.softmaxCrossEntropy(y);
+        // 计算Softmax交叉熄
+        Variable loss = predict.softmaxCrossEntropy(y);
+        
+        // 应用归约
+        return applyReduction(loss);
     }
 }
